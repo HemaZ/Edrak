@@ -19,12 +19,12 @@ else()
 endif()
 
 # Src files
-set(SRC_FILES_IO src/Edrak/IO/MonoReader.cpp
-    src/Edrak/IO/Utils.cpp
+set(SRC_FILES_IO Edrak/src/IO/MonoReader.cpp
+Edrak/src/IO/Utils.cpp
 )
 
 add_library(Edrak ${SRC_FILES_IO})
-target_include_directories(Edrak PUBLIC include)
+target_include_directories(Edrak PUBLIC Edrak/include)
 
 enable_testing()
 

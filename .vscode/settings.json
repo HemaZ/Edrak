@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.hpp": "cpp",
+        "*.xs": "javascript",
+        "*.make": "makefile",
+        "*.cfg": "javascript",
+        "*.bld": "javascript",
+        "*.tpp": "cpp",
+        "type_traits": "cpp"
+    },
+    "terminal.integrated.shell.windows": "cmd.exe",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+}

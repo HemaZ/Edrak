@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+build/*
+tests/2011_09_26/*

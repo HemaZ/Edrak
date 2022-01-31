@@ -55,7 +55,6 @@ TEST_CASE("Filter2D", "[Edrak::Images::matchTemplate()") {
   cv::Mat res;
   Edrak::Images::matchTemplate(
       img, templ, res, Edrak::Images::TemplateMatchingMethod::CC_NORMALIZED);
-  cv::imshow("Display Image", res);
-
-  cv::waitKey(0);
+  // cv::imshow("Display Image", res);
+  // cv::waitKey(0);
 }

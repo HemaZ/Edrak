@@ -20,7 +20,9 @@ void matchTemplate(InputArray _img, InputArray _templ, OutputArray _res,
   _templ.getMat().convertTo(_templ_fl, CV_32FC1);
   cv::filter2D(_img_fl, _res, -1, _templ_fl);
   cv::normalize(_res.getMat(), _res.getMat(), 0, 1, cv::NORM_MINMAX);
-  // TODO Normalize the crossCorrelation
+  if (method == TemplateMatchingMethod::CC_NORMALIZED) {
+    // TODO Normalize the crossCorrelation
+  }
 }
 } // namespace Images
 

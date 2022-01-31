@@ -21,6 +21,7 @@ endif()
 # Src files
 set(SRC_FILES_IO Edrak/src/IO/MonoReader.cpp
 Edrak/src/IO/Utils.cpp
+Edrak/src/Images/TemplateMatching.cpp
 )
 
 add_library(Edrak ${SRC_FILES_IO})
@@ -28,7 +29,7 @@ target_include_directories(Edrak PUBLIC Edrak/include)
 
 enable_testing()
 
-add_executable(mytest tests/MyTests.cpp)
+add_executable(mytest tests/MyTests.cpp tests/Images/Test_TemplateMatching.cpp)
 target_include_directories(Edrak PRIVATE tests)
 target_link_libraries(mytest PRIVATE Edrak)
 add_test(test1 mytest)
@@ -37,6 +38,17 @@ add_test(test1 mytest)
 find_package(OpenCV REQUIRED)
 target_link_libraries(Edrak PRIVATE "${OpenCV_LIBS}")
 target_include_directories(Edrak PRIVATE "${OpenCV_INCLUDE_DIRS}")
+
+# Boost 
+
+find_package(Boost 1.40 COMPONENTS program_options REQUIRED)
+target_link_libraries(Edrak PRIVATE Boost::program_options)
+
+
+# For Testing purpose only
+add_executable(EdrakMain Edrak/src/main.cpp)
+target_link_libraries(EdrakMain Edrak)
+
 
 # Clang tidy as optional static analyzer
 option(Template_USE_CLANG_TIDY "Use clang tidy for static analysis" TRUE)

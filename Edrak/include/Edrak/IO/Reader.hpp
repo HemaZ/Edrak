@@ -4,7 +4,15 @@
 #include <string>
 namespace Edrak {
 namespace IO {
+/**
+ * @brief Images types.
+ *
+ */
 enum class ImageType { RGB, GRAY };
+/**
+ * @brief Base class for all IO readers.
+ *
+ */
 class Reader {
 protected:
   std::string folderPath;

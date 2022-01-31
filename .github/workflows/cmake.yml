@@ -21,8 +21,10 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install OpenCV
-      run: sudo apt update && sudo apt install libopencv-dev python3
-    
+      run: sudo apt update && sudo apt install libopencv-dev
+    - name: Install Boost
+      run: sudo apt update && sudo apt-get install libboost-all-dev
+  
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type

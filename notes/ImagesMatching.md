@@ -25,10 +25,11 @@ Theses two methods have no invariance against changes in brightness and contrast
 
 Best estimate of the offset $[u_b,v_b]$ is given by maximizing the cross correlation coefficient over all possible locations.
 
-$$
-[u_b,v_b] = argmax_{u,v} \rho12(u,v)
-$$
+g2 is the template image.
+g1 is the image we are matching with. 
 
-$$
-\rho12(u,v) = \frac{\sigma_{g_1,g_2}(u,v)}{\sigma_{g_1}(u,v)\sigma{g_2}}
-$$
+![`cc`](imgs/cc.png)
+![`cc`](imgs/cc2.png)
+![`cc`](imgs/cc3.png)
+![`cc`](imgs/cc4.png)
+![`cc`](imgs/cc5.png)

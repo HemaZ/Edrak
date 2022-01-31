@@ -34,9 +34,9 @@ TEST_CASE("NextFrames returning correct number of frames",
   cv::Mat frame;
   while (reader.NextFrame(frame)) {
     REQUIRE_FALSE(!frame.data);
-    cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
-    cv::imshow("Display Image", frame);
-    cv::waitKey(0);
+    // cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
+    // cv::imshow("Display Image", frame);
+    // cv::waitKey(0);
   }
 }
 
@@ -48,8 +48,8 @@ TEST_CASE("NextFrames returning correct number of frames(RGB)",
   cv::Mat frame;
   while (reader.NextFrame(frame)) {
     REQUIRE_FALSE(!frame.data);
-    cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
-    cv::imshow("Display Image", frame);
-    cv::waitKey(0);
+    // cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
+    // cv::imshow("Display Image", frame);
+    // cv::waitKey(0);
   }
 }

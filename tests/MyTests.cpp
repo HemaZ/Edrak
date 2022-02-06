@@ -11,7 +11,7 @@
 #include <type_traits>
 
 // This tests the output of the `Edrak::IO::GetFiles` function
-TEST_CASE("correct files are returned", "[Edrak::IO::GetFiles]") {
+TEST_CASE("correct files are returned", "Edrak::IO::GetFiles") {
   std::string glob_pattern{
       "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/data/*.png"};
   std::vector<std::string> paths = Edrak::IO::GetFiles(glob_pattern);
@@ -27,7 +27,7 @@ TEST_CASE("correct files are returned", "[Edrak::IO::GetFiles]") {
 
 // This tests the correct out_of_range exceptions are generated
 TEST_CASE("NextFrames returning correct number of frames",
-          "[Edrak::IO::MonoReader::nextFrame]") {
+          "Edrak::IO::MonoReader::nextFrame") {
   Edrak::IO::MonoReader reader{
       "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/data/*.png",
       Edrak::IO::ImageType::GRAY, false};
@@ -41,7 +41,7 @@ TEST_CASE("NextFrames returning correct number of frames",
 }
 
 TEST_CASE("NextFrames returning correct number of frames(RGB)",
-          "[Edrak::IO::MonoReader::nextFrame]") {
+          "Edrak::IO::MonoReader::nextFrame") {
   Edrak::IO::MonoReader reader{
       "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_02/data/*.png",
       Edrak::IO::ImageType::RGB, false};

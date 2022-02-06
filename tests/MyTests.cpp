@@ -39,17 +39,3 @@ TEST_CASE("NextFrames returning correct number of frames",
     // cv::waitKey(0);
   }
 }
-
-TEST_CASE("NextFrames returning correct number of frames(RGB)",
-          "Edrak::IO::MonoReader::nextFrame") {
-  Edrak::IO::MonoReader reader{
-      "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_02/data/*.png",
-      Edrak::IO::ImageType::RGB, false};
-  cv::Mat frame;
-  while (reader.NextFrame(frame)) {
-    REQUIRE_FALSE(!frame.data);
-    // cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
-    // cv::imshow("Display Image", frame);
-    // cv::waitKey(0);
-  }
-}

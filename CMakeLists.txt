@@ -29,7 +29,7 @@ target_include_directories(Edrak PUBLIC Edrak/include)
 
 enable_testing()
 
-add_executable(mytest tests/MyTests.cpp tests/Images/Test_TemplateMatching.cpp)
+add_executable(mytest tests/MyTests.cpp tests/Images/Test_TemplateMatching.cpp tests/Types/Test_Transformation.cpp)
 target_include_directories(Edrak PRIVATE tests)
 target_link_libraries(mytest PRIVATE Edrak)
 add_test(test1 mytest)
@@ -44,6 +44,10 @@ target_include_directories(Edrak PRIVATE "${OpenCV_INCLUDE_DIRS}")
 find_package(Boost 1.40 COMPONENTS program_options REQUIRED)
 target_link_libraries(Edrak PRIVATE Boost::program_options)
 
+# Eigen
+
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+target_link_libraries(Edrak PRIVATE Eigen3::Eigen)
 
 # For Testing purpose only
 add_executable(EdrakMain Edrak/src/main.cpp)

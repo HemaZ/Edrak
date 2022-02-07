@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(Edrak)
 
 # ensure C++14
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -22,22 +22,16 @@ endif()
 set(SRC_FILES_IO Edrak/src/IO/MonoReader.cpp
 Edrak/src/IO/Utils.cpp
 Edrak/src/Images/TemplateMatching.cpp
+Edrak/src/Visual/3D.cpp
 )
 
 add_library(Edrak ${SRC_FILES_IO})
 target_include_directories(Edrak PUBLIC Edrak/include)
 
-enable_testing()
-
-add_executable(mytest tests/MyTests.cpp tests/Images/Test_TemplateMatching.cpp tests/Types/Test_Transformation.cpp)
-target_include_directories(Edrak PRIVATE tests)
-target_link_libraries(mytest PRIVATE Edrak)
-add_test(test1 mytest)
-
 # OpenCV as a required dependency for mylib
 find_package(OpenCV REQUIRED)
 target_link_libraries(Edrak PRIVATE "${OpenCV_LIBS}")
-target_include_directories(Edrak PRIVATE "${OpenCV_INCLUDE_DIRS}")
+include_directories("${OpenCV_INCLUDE_DIRS}")
 
 # Boost 
 
@@ -49,10 +43,24 @@ target_link_libraries(Edrak PRIVATE Boost::program_options)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 target_link_libraries(Edrak PRIVATE Eigen3::Eigen)
 
+# Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
+execute_process(COMMAND "./3rdparty/Pangolin/scripts/install_prerequisites.sh recommended")
+add_subdirectory(3rdparty/Pangolin/)
+find_package(Pangolin 0.4 REQUIRED)
+include_directories(${Pangolin_INCLUDE_DIRS})
+target_link_libraries(Edrak PRIVATE ${Pangolin_LIBRARIES})
+
+
+
 # For Testing purpose only
 add_executable(EdrakMain Edrak/src/main.cpp)
 target_link_libraries(EdrakMain Edrak)
 
+enable_testing()
+add_executable(mytest tests/MyTests.cpp tests/Images/Test_TemplateMatching.cpp tests/Types/Test_Transformation.cpp tests/Visual/test_3D.cpp)
+target_include_directories(Edrak PRIVATE tests )
+target_link_libraries(mytest PRIVATE Edrak "${OpenCV_LIBS}" Eigen3::Eigen)
+add_test(test1 mytest)
 
 # Clang tidy as optional static analyzer
 option(Template_USE_CLANG_TIDY "Use clang tidy for static analysis" TRUE)

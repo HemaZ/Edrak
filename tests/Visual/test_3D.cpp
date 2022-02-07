@@ -13,5 +13,5 @@ TEST_CASE("Test visual trajectory", "visual") {
   Edrak::Types::SE3D pose3{Edrak::Types::QuatD{1, 0, 0, 0}};
   pose3.pretranslate(Eigen::Vector3d{3, 0, 0});
   trajectory.push_back(pose3);
-  Edrak::Visual::DrawTrajectory(trajectory);
+  //   Edrak::Visual::DrawTrajectory(trajectory);
 }

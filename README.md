@@ -1,4 +1,4 @@
 # Edrak
 A toolbox for autonomous perception 
 
-[![CMake](https://github.com/HemaZ/Edrak/actions/workflows/cmake.yml/badge.svg?branch=dev)](https://github.com/HemaZ/Edrak/actions/workflows/cmake.yml)
+[![Linux Build](https://github.com/HemaZ/Edrak/actions/workflows/Linux.yml/badge.svg?branch=main)](https://github.com/HemaZ/Edrak/actions/workflows/Linux.yml)

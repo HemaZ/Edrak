@@ -66,8 +66,12 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "strstream": "cpp"
+        "strstream": "cpp",
+        "core": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "cSpell.words": [
+        "Edrak"
+    ]
 }

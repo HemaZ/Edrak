@@ -1,11 +1,11 @@
 #include "../catch.hpp"
 #include "Edrak/IO/Trajectory.hpp"
-#include "Edrak/Types/Transformation.hpp"
-#include "Edrak/Visual/3D.hpp"
+#include <cstdlib>
 
-TEST_CASE("Test visual trajectory", "visual") {
+TEST_CASE("test trajectory loading", "IO") {
+
   std::string data_dir = EDRAK_TEST_DATA_DIR;
   std::string traj_path = data_dir + "IO/trajectory/estimated.txt";
   Edrak::Types::TrajectoryD traj = Edrak::IO::LoadTrajectory(traj_path);
-  // Edrak::Visual::DrawTrajectory(traj);
+  REQUIRE(traj.size() == 612);
 }

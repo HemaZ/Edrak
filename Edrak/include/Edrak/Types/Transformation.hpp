@@ -3,6 +3,8 @@
 #include "Edrak/Exceptions/Exceptions.hpp"
 #include "eigen3/Eigen/Core"
 #include "eigen3/Eigen/Geometry"
+#define SOPHUS_USE_BASIC_LOGGING
+#include "sophus/se3.hpp"
 #include <vector>
 namespace Edrak {
 namespace Types {
@@ -18,12 +20,20 @@ using TransMatD = Eigen::Matrix3d;
  *
  */
 using TransMatF = Eigen::Matrix3f;
-using SE3D = Eigen::Isometry3d;
-using SE3F = Eigen::Isometry3f;
-using TrajectoryD =
-    std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>;
-using TrajectoryF =
-    std::vector<Eigen::Isometry3f, Eigen::aligned_allocator<Eigen::Isometry3f>>;
+using SE3D = Sophus::SE3d;
+using SE3F = Sophus::SE3f;
+using TrajectoryD = std::vector<SE3D, Eigen::aligned_allocator<SE3D>>;
+using TrajectoryF = std::vector<SE3F, Eigen::aligned_allocator<SE3F>>;
+using Vector3d = Eigen::Vector3d;
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param r
+ * @param p
+ * @param y
+ * @param res
+ */
 template <typename T> void RPYToQuat(T r, T p, T y, Eigen::Quaternion<T> &res) {
   using vector = Eigen::Matrix<T, 3, 1>;
   res = Eigen::AngleAxis<T>(r, vector::UnitX()) *

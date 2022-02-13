@@ -4,9 +4,7 @@
 
 namespace Edrak {
 namespace Visual {
-void DrawTrajectory(
-    std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>>
-        poses) {
+void DrawTrajectory(const Edrak::Types::TrajectoryD &poses) {
   // create pangolin window and plot the trajectory
   pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
   glEnable(GL_DEPTH_TEST);
@@ -49,6 +47,51 @@ void DrawTrajectory(
       glColor3f(0.0, 0.0, 0.0);
       glBegin(GL_LINES);
       auto p1 = poses[i], p2 = poses[i + 1];
+      glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
+      glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
+      glEnd();
+    }
+    pangolin::FinishFrame();
+    usleep(5000); // sleep 5 ms
+  }
+}
+
+void DrawTrajectory(const Edrak::Types::TrajectoryD &gt,
+                    const Edrak::Types::TrajectoryD &est) {
+  pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  pangolin::OpenGlRenderState s_cam(
+      pangolin::ProjectionMatrix(1024, 768, 500, 500, 512, 389, 0.1, 1000),
+      pangolin::ModelViewLookAt(0, -0.1, -1.8, 0, 0, 0, 0.0, -1.0, 0.0));
+
+  pangolin::View &d_cam = pangolin::CreateDisplay()
+                              .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175),
+                                         1.0, -1024.0f / 768.0f)
+                              .SetHandler(new pangolin::Handler3D(s_cam));
+
+  while (pangolin::ShouldQuit() == false) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    d_cam.Activate(s_cam);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    glLineWidth(2);
+    for (size_t i = 0; i < gt.size() - 1; i++) {
+      glColor3f(0.0f, 0.0f, 1.0f); // blue for ground truth
+      glBegin(GL_LINES);
+      auto p1 = gt[i], p2 = gt[i + 1];
+      glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
+      glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
+      glEnd();
+    }
+
+    for (size_t i = 0; i < est.size() - 1; i++) {
+      glColor3f(1.0f, 0.0f, 0.0f); // red for estimated
+      glBegin(GL_LINES);
+      auto p1 = est[i], p2 = est[i + 1];
       glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
       glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
       glEnd();

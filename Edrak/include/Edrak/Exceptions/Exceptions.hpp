@@ -15,6 +15,16 @@ public:
   InvalidDimensions(const std::string &_reason = "Invalid dimensions detected")
       : std::invalid_argument(_reason) {}
 };
+class FileNotFound : public std::runtime_error {
+public:
+  FileNotFound(const std::string &_reason = "[Edrak] File Not found Exception")
+      : std::runtime_error(_reason) {}
+};
+class WrongSize : public std::runtime_error {
+public:
+  WrongSize(const std::string &_reason = "[Edrak] File Not found Exception")
+      : std::runtime_error(_reason) {}
+};
 } // namespace Exceptions
 
 } // namespace Edrak

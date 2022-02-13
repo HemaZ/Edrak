@@ -7,7 +7,19 @@
 
 namespace Edrak {
 namespace Visual {
-void DrawTrajectory(Edrak::Types::TrajectoryD);
+/**
+ * @brief Draw 3D trajectory.
+ *
+ */
+void DrawTrajectory(const Edrak::Types::TrajectoryD &);
+/**
+ * @brief Draw 2 Trajectories together for comparision.
+ *
+ * @param gt First trajectory (ground truth trajectory).
+ * @param est Second trajectory (estimated trajectory)
+ */
+void DrawTrajectory(const Edrak::Types::TrajectoryD &gt,
+                    const Edrak::Types::TrajectoryD &est);
 } // namespace Visual
 
 } // namespace Edrak

@@ -43,6 +43,7 @@ include_directories(3rdparty/fmt/include)
 # Sophus
 set(USE_BASIC_LOGGING ON)
 set(BUILD_SOPHUS_TESTS OFF)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 add_subdirectory(3rdparty/Sophus/)
 include_directories(3rdparty/Sophus)
 

@@ -52,6 +52,7 @@ include_directories(3rdparty/Sophus)
 set(EDRAK_SRC_FILES Edrak/src/IO/MonoReader.cpp
 Edrak/src/IO/Utils.cpp
 Edrak/src/Images/TemplateMatching.cpp
+Edrak/src/Images/Calibration.cpp
 Edrak/src/Visual/3D.cpp
 Edrak/src/Evaluation/Trajectory.cpp
 Edrak/src/IO/Trajectory.cpp
@@ -77,6 +78,7 @@ tests/Images/Test_TemplateMatching.cpp
 tests/Types/Test_Transformation.cpp 
 tests/Visual/test_3D.cpp
 tests/IO/test_trajectory.cpp
+tests/Images/Test_Calibration.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})

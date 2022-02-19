@@ -56,6 +56,7 @@ Edrak/src/Images/Calibration.cpp
 Edrak/src/Visual/3D.cpp
 Edrak/src/Evaluation/Trajectory.cpp
 Edrak/src/IO/Trajectory.cpp
+Edrak/src/Images/RGBD.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})
@@ -79,6 +80,7 @@ tests/Types/Test_Transformation.cpp
 tests/Visual/test_3D.cpp
 tests/IO/test_trajectory.cpp
 tests/Images/Test_Calibration.cpp
+tests/Images/Test_RGBD.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})

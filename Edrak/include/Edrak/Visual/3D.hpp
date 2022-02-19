@@ -20,6 +20,8 @@ void DrawTrajectory(const Edrak::Types::TrajectoryD &);
  */
 void DrawTrajectory(const Edrak::Types::TrajectoryD &gt,
                     const Edrak::Types::TrajectoryD &est);
+void DrawPointCloud(const Edrak::Types::PointCloudID &);
+void DrawPointCloud(const Edrak::Types::PointCloudRGB &);
 } // namespace Visual
 
 } // namespace Edrak

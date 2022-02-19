@@ -25,6 +25,11 @@ using SE3F = Sophus::SE3f;
 using TrajectoryD = std::vector<SE3D, Eigen::aligned_allocator<SE3D>>;
 using TrajectoryF = std::vector<SE3F, Eigen::aligned_allocator<SE3F>>;
 using Vector3d = Eigen::Vector3d;
+using Vector6d = Eigen::Matrix<double, 6, 1>;
+
+using PointCloudID =
+    std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>>;
+using PointCloudRGB = std::vector<Vector6d, Eigen::aligned_allocator<Vector6d>>;
 /**
  * @brief
  *

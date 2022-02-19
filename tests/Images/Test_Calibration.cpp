@@ -51,8 +51,10 @@ TEST_CASE("UndistortRGB", "Undistort") {
   // 9.812178e+02 0.000000e+00 6.900000e+02
   // 0.000000e+00 9.758994e+02 2.471364e+02 0.000000e+00
   // 0.000000e+00 1.000000e+00
-  Edrak::Images::CameraMatD camMat{9.812178e+02, 9.758994e+02, 6.900000e+02,
-                                   2.471364e+02};
+  Eigen::Matrix3d mat;
+  mat << 9.569475e+02, 0.000000e+00, 6.939767e+02, 0.000000e+00, 9.522352e+02,
+      2.386081e+02, 0.000000e+00, 0.000000e+00, 1.000000e+00;
+  Edrak::Images::CameraMatD camMat = Edrak::Images::CameraMatD::FromMat(mat);
   Edrak::Images::RadTanCoeffsD RadTan{-3.791375e-01, 2.148119e-01, 1.227094e-03,
                                       2.343833e-03};
   std::string data_dir = EDRAK_TEST_DATA_DIR;

@@ -25,5 +25,5 @@ TEST_CASE("RGBD", "RGBD") {
     pointcloud_all.insert(pointcloud_all.end(), pointcloud.begin(),
                           pointcloud.end());
   }
-  Edrak::Visual::DrawPointCloud(pointcloud_all);
+//   Edrak::Visual::DrawPointCloud(pointcloud_all);
 }

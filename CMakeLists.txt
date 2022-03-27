@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(Edrak)
 
 # ensure C++17
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -34,6 +34,8 @@ add_subdirectory(3rdparty/Pangolin/)
 find_package(Pangolin 0.4 REQUIRED)
 include_directories(${Pangolin_INCLUDE_DIRS})
 
+# Ceres 
+find_package(Ceres REQUIRED)
 
 #fmt 
 add_subdirectory(3rdparty/fmt/)
@@ -46,6 +48,12 @@ set(BUILD_SOPHUS_TESTS OFF)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 add_subdirectory(3rdparty/Sophus/)
 include_directories(3rdparty/Sophus)
+
+# G2o
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/3rdparty/g2o/cmake_modules)
+find_package(G2O REQUIRED)
+include_directories(${G2O_INCLUDE_DIR})
+
 
 
 
@@ -66,6 +74,7 @@ target_link_libraries(Edrak PRIVATE "${OpenCV_LIBS}")
 target_link_libraries(Edrak PRIVATE Boost::program_options)
 target_link_libraries(Edrak PRIVATE Eigen3::Eigen)
 target_link_libraries(Edrak PRIVATE ${Pangolin_LIBRARIES})
+target_link_libraries(Edrak PRIVATE ceres)
 
 
 
@@ -82,12 +91,14 @@ tests/Visual/test_3D.cpp
 tests/IO/test_trajectory.cpp
 tests/Images/Test_Calibration.cpp
 tests/Images/Test_RGBD.cpp
+tests/3rdparty/ceresCurveFitting.cpp
+tests/3rdparty/g2oCurveFitting.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})
 target_include_directories(Edrak PRIVATE tests )
 target_compile_definitions(mytest PUBLIC EDRAK_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/")
-target_link_libraries(mytest PRIVATE Edrak "${OpenCV_LIBS}" Eigen3::Eigen ${FMT_LIBRARIES})
+target_link_libraries(mytest PRIVATE Edrak "${OpenCV_LIBS}" Eigen3::Eigen ${FMT_LIBRARIES} ${CERES_LIBRARIES} ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 add_test(test1 mytest)
 
 

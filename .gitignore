@@ -32,4 +32,5 @@
 *.app
 
 build/*
-tests/2011_09_26/*
+tests/2011_09*
+tests/2011_09_28_drive_0035*

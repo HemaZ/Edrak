@@ -93,6 +93,7 @@ tests/Images/Test_Calibration.cpp
 tests/Images/Test_RGBD.cpp
 tests/3rdparty/ceresCurveFitting.cpp
 tests/3rdparty/g2oCurveFitting.cpp
+tests/3rdparty/opencvOrb.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})

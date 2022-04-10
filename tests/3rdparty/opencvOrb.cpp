@@ -66,7 +66,7 @@ TEST_CASE("OpenCv_Features", "OrbFeatures") {
   cv::drawMatches(im1, keyPoints1, im2, keyPoints2, matches, imallMatches);
   cv::drawMatches(im1, keyPoints1, im2, keyPoints2, filteredMatches,
                   imfilteredMatches);
-  cv::imshow("all matches", imallMatches);
-  cv::imshow("Filtered matches", imfilteredMatches);
-  cv::waitKey(0);
+  // cv::imshow("all matches", imallMatches);
+  // cv::imshow("Filtered matches", imfilteredMatches);
+  // cv::waitKey(0);
 }

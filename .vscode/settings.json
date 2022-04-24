@@ -67,7 +67,17 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "strstream": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "csignal": "cpp",
+        "any": "cpp",
+        "cfenv": "cpp",
+        "codecvt": "cpp",
+        "unordered_set": "cpp",
+        "regex": "cpp",
+        "future": "cpp",
+        "scoped_allocator": "cpp",
+        "shared_mutex": "cpp",
+        "valarray": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",

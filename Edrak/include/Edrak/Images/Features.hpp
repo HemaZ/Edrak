@@ -1,3 +1,6 @@
+#ifndef __EDRAK_IMAGE_FEATURES_H__
+#define __EDRAK_IMAGE_FEATURES_H__
+
 #include <cstdint>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -39,11 +42,16 @@ using KeyPoints = std::vector<KeyPoint>;
  * detected corners (keypoints).
  */
 void FAST(const cv::Mat &img, KeyPoints &kps, int threshold,
-          bool non_max_suppresion) {
-  cv::FAST(img, kps, threshold, non_max_suppresion);
-}
+          bool non_max_suppresion);
 
 } // namespace KeyPoints
+
+using cv::DMatch;
+/**
+ * @brief Vector of 2D Matches. @sa cv::DMatch
+ *
+ */
+using Matches2D = std::vector<DMatch>;
 
 /**
  * @brief Computes ORB descriptors and FAST angles.
@@ -52,11 +60,60 @@ void FAST(const cv::Mat &img, KeyPoints &kps, int threshold,
  * @param kps KeyPoints.
  * @param descriptors ORB descriptors.
  */
-void ORB(const cv::Mat &img, const KeyPoints::KeyPoints &kps,
-         Descriptors::Descriptors<Descriptors::BRIEF> &descriptors);
+void ORB(const cv::Mat &img, KeyPoints::KeyPoints &kps, cv::Mat &descriptors);
+/**
+ * @brief
+ *
+ * @param img1
+ * @param img2
+ * @param kps1
+ * @param kps2
+ * @param matches
+ */
+void ExtractORBMatches(const cv::Mat &img1, const cv::Mat &img2,
+                       KeyPoints::KeyPoints &kps1, KeyPoints::KeyPoints &kps2,
+                       Matches2D &matches);
+/**
+ * @brief Keypoints matching using descriptors and BruteForce-Hamming Algorithm.
+ *
+ * @param descriptors1 First keypoints' descriptors.
+ * @param descriptors2 Second keypoints' descriptors.
+ * @param matches Matched keypoints.
+ */
+void FeaturesMatching(const cv::Mat &descriptors1, const cv::Mat &descriptors2,
+                      Matches2D &matches);
+/**
+ * @brief Filter Matches which have distance < (max->distance - min->distance) *
+ * ratio.
+ *
+ * @param matches [Input] 2D Keypoints matches.
+ * @param filteredMatches [Output] Filtered matches.
+ * @param ratio filtering [Input] ratio.
+ */
+void FilterMatches(const Matches2D &matches, Matches2D &filteredMatches,
+                   float ratio = 0.3);
 
+/**
+ * @brief Extract Points2f from Matches.
+ *
+ * @param matches
+ * @param pts1
+ * @param pts2
+ */
+inline void MatchesToPoints(const Matches2D &matches,
+                            const KeyPoints::KeyPoints &keyPoints1,
+                            const KeyPoints::KeyPoints &keyPoints2,
+                            std::vector<cv::Point2f> &pts1,
+                            std::vector<cv::Point2f> &pts2) {
+  for (const auto &match : matches) {
+    pts1.push_back(keyPoints1[match.queryIdx].pt);
+    pts2.push_back(keyPoints2[match.trainIdx].pt);
+  }
+}
 } // namespace Features
 
 } // namespace Images
 
 } // namespace Edrak
+
+#endif // __EDRAK_IMAGE_FEATURES_H__

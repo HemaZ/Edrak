@@ -67,6 +67,7 @@ Edrak/src/Evaluation/Trajectory.cpp
 Edrak/src/IO/Trajectory.cpp
 Edrak/src/Images/RGBD.cpp
 Edrak/src/Images/Features.cpp
+Edrak/src/VO/2D/PoseEstmation.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})
@@ -92,10 +93,11 @@ tests/Visual/test_3D.cpp
 tests/IO/test_trajectory.cpp
 tests/Images/Test_Calibration.cpp
 tests/Images/Test_RGBD.cpp
-tests/3rdparty/ceresCurveFitting.cpp
-tests/3rdparty/g2oCurveFitting.cpp
+# tests/3rdparty/ceresCurveFitting.cpp
+# tests/3rdparty/g2oCurveFitting.cpp
 tests/3rdparty/opencvOrb.cpp
 tests/Images/Test_Features.cpp
+tests/VO/test_PoseEstmation.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})

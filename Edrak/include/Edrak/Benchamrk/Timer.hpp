@@ -11,7 +11,7 @@ public:
 
   void Stop() {
 
-    assert(stoped_);
+    assert(!stoped_);
     t_end_ = std::chrono::steady_clock::now();
     t_elapsed_ = std::chrono::duration_cast<std::chrono::duration<double>>(
         t_end_ - t_start_);

@@ -1,5 +1,5 @@
 #ifndef __EDRAK_IO_UTILS_H__
-#define ____EDRAK_IO_UTILS_H__
+#define __EDRAK_IO_UTILS_H__
 #include <glob.h>
 #include <string>
 #include <vector>

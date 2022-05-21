@@ -7,7 +7,6 @@
 #include "sophus/se3.hpp"
 #include <vector>
 namespace Edrak {
-namespace Types {
 using QuatD = Eigen::Quaternion<double>;
 using QuatF = Eigen::Quaternion<float>;
 /**
@@ -22,10 +21,14 @@ using TransMatD = Eigen::Matrix3d;
 using TransMatF = Eigen::Matrix3f;
 using SE3D = Sophus::SE3d;
 using SE3F = Sophus::SE3f;
+using SO3D = Sophus::SO3d;
 using TrajectoryD = std::vector<SE3D, Eigen::aligned_allocator<SE3D>>;
 using TrajectoryF = std::vector<SE3F, Eigen::aligned_allocator<SE3F>>;
 using Vector3d = Eigen::Vector3d;
 using Vector6d = Eigen::Matrix<double, 6, 1>;
+using Point3D = Eigen::Vector3d;
+using Point3F = Eigen::Vector3f;
+using Points3D = Eigen::MatrixX3d;
 
 using PointCloudID =
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>>;
@@ -46,7 +49,6 @@ template <typename T> void RPYToQuat(T r, T p, T y, Eigen::Quaternion<T> &res) {
         Eigen::AngleAxis<T>(y, vector::UnitZ());
   res.normalize();
 }
-} // namespace Types
 
 } // namespace Edrak
 

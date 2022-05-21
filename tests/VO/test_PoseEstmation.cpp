@@ -13,12 +13,12 @@ TEST_CASE("TEST_POSE_ESTMATION", "VO") {
 
   Edrak::IO::MonoReader reader(data_dir + "VO/*.png");
   cv::Mat frame;
-  Edrak::Types::TrajectoryD trajectory;
+  Edrak::TrajectoryD trajectory;
   for (size_t i = 0; i < 10; i++) {
     reader.NextFrame(frame);
     pe.Process(frame);
-    std::cout << "Pose" << i << pe.Pose().matrix() << std::endl;
+    // std::cout << "Pose" << i << pe.Pose().matrix() << std::endl;
     trajectory.push_back(pe.Pose());
   }
-  Edrak::Visual::DrawTrajectory(trajectory);
+  // Edrak::Visual::DrawTrajectory(trajectory);
 }

@@ -4,7 +4,7 @@
 
 namespace Edrak {
 namespace Visual {
-void DrawTrajectory(const Edrak::Types::TrajectoryD &poses) {
+void DrawTrajectory(const Edrak::TrajectoryD &poses) {
   // create pangolin window and plot the trajectory
   pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
   glEnable(GL_DEPTH_TEST);
@@ -56,8 +56,8 @@ void DrawTrajectory(const Edrak::Types::TrajectoryD &poses) {
   }
 }
 
-void DrawTrajectory(const Edrak::Types::TrajectoryD &gt,
-                    const Edrak::Types::TrajectoryD &est) {
+void DrawTrajectory(const Edrak::TrajectoryD &gt,
+                    const Edrak::TrajectoryD &est) {
   pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
@@ -100,7 +100,7 @@ void DrawTrajectory(const Edrak::Types::TrajectoryD &gt,
     usleep(5000); // sleep 5 ms
   }
 }
-void DrawPointCloud(const Edrak::Types::PointCloudID &pointcloud) {
+void DrawPointCloud(const Edrak::PointCloudID &pointcloud) {
 
   pangolin::CreateWindowAndBind("Point Cloud Viewer", 1024, 768);
   glEnable(GL_DEPTH_TEST);
@@ -135,7 +135,7 @@ void DrawPointCloud(const Edrak::Types::PointCloudID &pointcloud) {
   return;
 }
 
-void DrawPointCloud(const Edrak::Types::PointCloudRGB &pointcloud) {
+void DrawPointCloud(const Edrak::PointCloudRGB &pointcloud) {
   pangolin::CreateWindowAndBind("Point Cloud Viewer", 1024, 768);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);

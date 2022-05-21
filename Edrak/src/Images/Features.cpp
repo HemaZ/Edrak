@@ -49,7 +49,7 @@ void FilterMatches(const Matches2D &matches, Matches2D &filteredMatches,
   float filerDist = (max->distance - min->distance) * ratio;
   // Filter Bad matches
   for (const auto &match : matches) {
-    if (match.distance < filerDist)
+    if (match.distance < 30.0)
       filteredMatches.push_back(match);
   }
 }

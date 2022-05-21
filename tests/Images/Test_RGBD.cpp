@@ -13,7 +13,7 @@ TEST_CASE("RGBD", "RGBD") {
   auto trajectory =
       Edrak::IO::LoadTrajectory(data_dir + "Images/RGBD/pose.txt");
   Edrak::Images::CameraMatD intrinsics{518.0, 519.0, 325.5, 253.5};
-  Edrak::Types::PointCloudRGB pointcloud_all;
+  Edrak::PointCloudRGB pointcloud_all;
   for (int i = 0; i < 5; i++) {
     boost::format fmt("./%s/%d.%s");
     cv::Mat rgb =

@@ -43,16 +43,16 @@ void PoseEstmation::Process(const cv::Mat &img) {
   Eigen::Vector3d teigen;
   cv::cv2eigen(R, Reigen);
   cv::cv2eigen(t, teigen);
-  pose_ = Edrak::Types::SE3D(Reigen, teigen);
+  pose_ = Edrak::SE3D(Reigen, teigen);
 
   // Check Epipolar constraint.
-  for (size_t i = 0; i < prevPoints.size(); ++i) {
-    Eigen::Vector3d y1, y2;
-    y1 << k_.x(prevPoints[i].x), k_.x(prevPoints[i].y), 1;
-    y2 << k_.x(currPoints[i].x), k_.x(currPoints[i].y), 1;
-    Eigen::MatrixXd d = y2.transpose() * t_x * Reigen * y1;
-    std::cout << "d[" << i << "] " << d << std::endl;
-  }
+  // for (size_t i = 0; i < prevPoints.size(); ++i) {
+  //   Eigen::Vector3d y1, y2;
+  //   y1 << k_.x(prevPoints[i].x), k_.x(prevPoints[i].y), 1;
+  //   y2 << k_.x(currPoints[i].x), k_.x(currPoints[i].y), 1;
+  //   Eigen::MatrixXd d = y2.transpose() * t_x * Reigen * y1;
+  //   std::cout << "d[" << i << "] " << d << std::endl;
+  // }
 }
 } // namespace VO
 } // namespace Edrak

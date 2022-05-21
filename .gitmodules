@@ -7,3 +7,6 @@
 [submodule "3rdparty/fmt"]
 	path = 3rdparty/fmt
 	url = git@github.com:fmtlib/fmt.git
+[submodule "3rdparty/g2o"]
+	path = 3rdparty/g2o
+	url = git@github.com:RainerKuemmerle/g2o.git

@@ -27,10 +27,10 @@ find_package(Boost 1.40 COMPONENTS program_options REQUIRED)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 # Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
-execute_process(COMMAND "./3rdparty/Pangolin/scripts/install_prerequisites.sh recommended")
-set(BUILD_EXAMPLES OFF)
-set(BUILD_TESTS OFF)
-add_subdirectory(3rdparty/Pangolin/)
+# execute_process(COMMAND "./3rdparty/Pangolin/scripts/install_prerequisites.sh recommended")
+# set(BUILD_EXAMPLES OFF)
+# set(BUILD_TESTS OFF)
+# add_subdirectory(3rdparty/Pangolin/)
 find_package(Pangolin 0.4 REQUIRED)
 include_directories(${Pangolin_INCLUDE_DIRS})
 
@@ -38,8 +38,8 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 find_package(Ceres REQUIRED)
 
 #fmt 
-add_subdirectory(3rdparty/fmt/)
-include_directories(3rdparty/fmt/include)
+# add_subdirectory(3rdparty/fmt/)
+# include_directories(3rdparty/fmt/include)
 
 
 # Sophus
@@ -68,6 +68,7 @@ Edrak/src/IO/Trajectory.cpp
 Edrak/src/Images/RGBD.cpp
 Edrak/src/Images/Features.cpp
 Edrak/src/VO/2D/PoseEstmation.cpp
+Edrak/src/3D/ICP.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})
@@ -98,6 +99,8 @@ tests/Images/Test_RGBD.cpp
 tests/3rdparty/opencvOrb.cpp
 tests/Images/Test_Features.cpp
 tests/VO/test_PoseEstmation.cpp
+tests/3D/Test_utils.cpp
+tests/3D/Test_ICP.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})
@@ -117,18 +120,5 @@ if (Template_USE_CLANG_TIDY)
     else()
       message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
       set_target_properties(Edrak PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-    endif()
-endif()
-
-
-# Setup coverage testing for GCC or Clang
-option(Template_ENABLE_COVERAGE "Enable coverage reporting for GCC or Clang" TRUE)
-if (Template_ENABLE_COVERAGE)
-    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-        message(STATUS "Configuring with coverage")
-        target_compile_options(Edrak PUBLIC --coverage -O0)
-        target_link_libraries(Edrak PUBLIC --coverage)
-    else()
-        message(FATAL_ERROR "GCC or Clang required with Template_ENABLE_COVERAGE: found ${CMAKE_CXX_COMPILER_ID}")
     endif()
 endif()

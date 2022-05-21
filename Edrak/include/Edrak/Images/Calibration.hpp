@@ -15,8 +15,8 @@ public:
   T fy;
   T cx;
   T cy;
-  T x(int u) const { return (u - cx) / fx; }
-  T y(int v) const { return (v - cy) / fy; }
+  T x(int u, T d = 1.0) const { return d * (u - cx) / fx; }
+  T y(int v, T d = 1.0) const { return d * (v - cy) / fy; }
   T u(T x) const { return fx * x + cx; }
   T v(T y) const { return fy * y + cy; }
   static CameraMatrix<T> FromMat(const Eigen::Matrix<T, 3, 3> &mat) {

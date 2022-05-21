@@ -3,8 +3,8 @@
 
 namespace Edrak {
 namespace Evaluation {
-double RMSE(const Edrak::Types::TrajectoryD &gt,
-            const Edrak::Types::TrajectoryD &est) {
+double RMSE(const Edrak::TrajectoryD &gt,
+            const Edrak::TrajectoryD &est) {
   if (gt.size() != est.size()) {
     throw Edrak::Exceptions::WrongSize(
         "The two trajectories sizes don't match!");

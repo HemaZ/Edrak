@@ -10,3 +10,6 @@
 [submodule "3rdparty/g2o"]
 	path = 3rdparty/g2o
 	url = git@github.com:RainerKuemmerle/g2o.git
+[submodule "3rdparty/imgui"]
+	path = 3rdparty/imgui
+	url = git@github.com:ocornut/imgui.git

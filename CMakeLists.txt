@@ -54,7 +54,24 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/3rdparty/g2o/cmake_modules)
 find_package(G2O REQUIRED)
 include_directories(${G2O_INCLUDE_DIR})
 
+find_package(glfw3 3.3 REQUIRED)
+find_package(OpenGL REQUIRED)
 
+set(IMGGUI_PATH 3rdparty/imgui)
+include_directories( ${IMGGUI_PATH})
+include_directories( ${IMGGUI_PATH}/backends)
+
+set(IMGUI_SRCS ${IMGGUI_PATH}/imgui.cpp
+${IMGGUI_PATH}/imgui_demo.cpp
+${IMGGUI_PATH}/imgui_draw.cpp
+${IMGGUI_PATH}/imgui_tables.cpp
+${IMGGUI_PATH}/imgui_widgets.cpp
+${IMGGUI_PATH}/backends/imgui_impl_glfw.cpp
+${IMGGUI_PATH}/backends/imgui_impl_opengl3.cpp
+)
+
+add_library(ImgGui ${IMGUI_SRCS})
+target_link_libraries(ImgGui glfw OpenGL::GL ${CMAKE_DL_LIBS})
 
 
 # Src files
@@ -85,6 +102,10 @@ target_link_libraries(Edrak PRIVATE ceres)
 add_executable(EdrakMain Edrak/src/main.cpp)
 target_link_libraries(EdrakMain Edrak Eigen3::Eigen ${FMT_LIBRARIES})
 
+add_executable(ImgGui_Test tests/Visual/Test_GUI.cpp)
+target_link_libraries(ImgGui_Test ImgGui Edrak)
+
+
 enable_testing()
 
 set(TESTS_SRCS tests/MyTests.cpp 
@@ -106,7 +127,7 @@ tests/3D/Test_ICP.cpp
 add_executable(mytest ${TESTS_SRCS})
 target_include_directories(Edrak PRIVATE tests )
 target_compile_definitions(mytest PUBLIC EDRAK_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/")
-target_link_libraries(mytest PRIVATE Edrak "${OpenCV_LIBS}" Eigen3::Eigen ${FMT_LIBRARIES} ${CERES_LIBRARIES} ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+target_link_libraries(mytest PRIVATE Edrak "${OpenCV_LIBS}" Eigen3::Eigen ${FMT_LIBRARIES} ${CERES_LIBRARIES} ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ImgGui)
 add_test(test1 mytest)
 
 

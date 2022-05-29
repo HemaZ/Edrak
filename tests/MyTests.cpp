@@ -12,25 +12,20 @@
 
 // This tests the output of the `Edrak::IO::GetFiles` function
 TEST_CASE("correct files are returned", "Edrak::IO::GetFiles") {
-  std::string glob_pattern{
-      "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/data/*.png"};
+  std::string data_dir = EDRAK_TEST_DATA_DIR;
+  std::string img_path = data_dir + "VO";
+  std::string glob_pattern{img_path + "/*.png"};
   std::vector<std::string> paths = Edrak::IO::GetFiles(glob_pattern);
-  CHECK(paths[0] == "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/"
-                    "data/0000000000.png");
-  CHECK(paths[1] == "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/"
-                    "data/0000000001.png");
-  CHECK(paths[2] == "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/"
-                    "data/0000000002.png");
-  CHECK(paths[76] == "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/"
-                     "data/0000000076.png");
+  CHECK(paths.size() == 11);
 }
 
 // This tests the correct out_of_range exceptions are generated
 TEST_CASE("NextFrames returning correct number of frames",
           "Edrak::IO::MonoReader::nextFrame") {
-  Edrak::IO::MonoReader reader{
-      "../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/data/*.png",
-      Edrak::IO::ImageType::GRAY, false};
+  std::string data_dir = EDRAK_TEST_DATA_DIR;
+  std::string img_path = data_dir + "VO";
+  Edrak::IO::MonoReader reader{img_path + "/*.png", Edrak::IO::ImageType::GRAY,
+                               false};
   cv::Mat frame;
   while (reader.NextFrame(frame)) {
     REQUIRE_FALSE(!frame.data);

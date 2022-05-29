@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(Edrak)
 
-# ensure C++17
+# ensure C++20
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -18,13 +18,9 @@ else()
     add_compile_options()
 endif()
 
-# OpenCV as a required dependency for Edrak
-find_package(OpenCV REQUIRED)
-include_directories("${OpenCV_INCLUDE_DIRS}")
-# Boost 
-find_package(Boost 1.40 COMPONENTS program_options REQUIRED)
-# Eigen
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 
 # Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
 # execute_process(COMMAND "./3rdparty/Pangolin/scripts/install_prerequisites.sh recommended")
@@ -33,21 +29,6 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 # add_subdirectory(3rdparty/Pangolin/)
 find_package(Pangolin 0.4 REQUIRED)
 include_directories(${Pangolin_INCLUDE_DIRS})
-
-# Ceres 
-find_package(Ceres REQUIRED)
-
-#fmt 
-# add_subdirectory(3rdparty/fmt/)
-# include_directories(3rdparty/fmt/include)
-
-
-# Sophus
-set(USE_BASIC_LOGGING ON)
-set(BUILD_SOPHUS_TESTS OFF)
-set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
-add_subdirectory(3rdparty/Sophus/)
-include_directories(3rdparty/Sophus)
 
 # G2o
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/3rdparty/g2o/cmake_modules)
@@ -71,7 +52,7 @@ ${IMGGUI_PATH}/backends/imgui_impl_opengl3.cpp
 )
 
 add_library(ImgGui ${IMGUI_SRCS})
-target_link_libraries(ImgGui glfw OpenGL::GL ${CMAKE_DL_LIBS})
+target_link_libraries(ImgGui ${CONAN_LIBS})
 
 
 # Src files
@@ -90,17 +71,15 @@ Edrak/src/3D/ICP.cpp
 
 add_library(Edrak ${EDRAK_SRC_FILES})
 target_include_directories(Edrak PUBLIC Edrak/include)
-target_link_libraries(Edrak PRIVATE "${OpenCV_LIBS}")
-target_link_libraries(Edrak PRIVATE Boost::program_options)
-target_link_libraries(Edrak PRIVATE Eigen3::Eigen)
+target_link_libraries(Edrak PRIVATE ${CONAN_LIBS})
 target_link_libraries(Edrak PRIVATE ${Pangolin_LIBRARIES})
-target_link_libraries(Edrak PRIVATE ceres)
+target_link_libraries(Edrak PRIVATE  ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 
 
 # For Testing purpose only
 add_executable(EdrakMain Edrak/src/main.cpp)
-target_link_libraries(EdrakMain Edrak Eigen3::Eigen ${FMT_LIBRARIES})
+target_link_libraries(EdrakMain Edrak)
 
 add_executable(ImgGui_Test tests/Visual/Test_GUI.cpp)
 target_link_libraries(ImgGui_Test ImgGui Edrak)
@@ -115,8 +94,8 @@ tests/Visual/test_3D.cpp
 tests/IO/test_trajectory.cpp
 tests/Images/Test_Calibration.cpp
 tests/Images/Test_RGBD.cpp
-# tests/3rdparty/ceresCurveFitting.cpp
-# tests/3rdparty/g2oCurveFitting.cpp
+tests/3rdparty/ceresCurveFitting.cpp
+tests/3rdparty/g2oCurveFitting.cpp
 tests/3rdparty/opencvOrb.cpp
 tests/Images/Test_Features.cpp
 tests/VO/test_PoseEstmation.cpp
@@ -127,19 +106,5 @@ tests/3D/Test_ICP.cpp
 add_executable(mytest ${TESTS_SRCS})
 target_include_directories(Edrak PRIVATE tests )
 target_compile_definitions(mytest PUBLIC EDRAK_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/")
-target_link_libraries(mytest PRIVATE Edrak "${OpenCV_LIBS}" Eigen3::Eigen ${FMT_LIBRARIES} ${CERES_LIBRARIES} ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ImgGui)
+target_link_libraries(mytest PRIVATE Edrak)
 add_test(test1 mytest)
-
-
-# Clang tidy as optional static analyzer
-option(Template_USE_CLANG_TIDY "Use clang tidy for static analysis" TRUE)
-if (Template_USE_CLANG_TIDY)
-    find_program(CLANG_TIDY_EXE NAMES "clang-tidy" "clang-tidy-6.0" "clang-tidy-5.0" "clang-tidy-4.0"
-                 DOC "Path to clang-tidy executable")
-    if(NOT CLANG_TIDY_EXE)
-      message(STATUS "clang-tidy not found.")
-    else()
-      message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-      set_target_properties(Edrak PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-    endif()
-endif()

@@ -44,17 +44,19 @@ TEST_CASE("Results Dimensions Validation", "Edrak::Images::matchTemplate()") {
 
 TEST_CASE("Filter2D", "Edrak::Images::matchTemplate()") {
 
-  cv::Mat img = cv::imread("../tests/2011_09_26/2011_09_26_drive_0002_sync/"
-                           "image_00/data/0000000000.png",
-                           cv::IMREAD_GRAYSCALE);
-  cv::Mat templ =
-      cv::imread("../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/"
-                 "0000000000_template.png",
-                 cv::IMREAD_GRAYSCALE);
+  //   cv::Mat img =
+  //   cv::imread("../tests/2011_09_26/2011_09_26_drive_0002_sync/"
+  //                            "image_00/data/0000000000.png",
+  //                            cv::IMREAD_GRAYSCALE);
+  //   cv::Mat templ =
+  //       cv::imread("../tests/2011_09_26/2011_09_26_drive_0002_sync/image_00/"
+  //                  "0000000000_template.png",
+  //                  cv::IMREAD_GRAYSCALE);
 
-  cv::Mat res;
-  Edrak::Images::matchTemplate(
-      img, templ, res, Edrak::Images::TemplateMatchingMethod::CC_NORMALIZED);
+  //   cv::Mat res;
+  //   Edrak::Images::matchTemplate(
+  //       img, templ, res,
+  //       Edrak::Images::TemplateMatchingMethod::CC_NORMALIZED);
   // cv::imshow("Display Image", res);
   // cv::waitKey(0);
 }

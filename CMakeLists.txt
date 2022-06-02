@@ -35,8 +35,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/3rdparty/g2o/cmake_modules)
 find_package(G2O REQUIRED)
 include_directories(${G2O_INCLUDE_DIR})
 
-find_package(glfw3 3.3 REQUIRED)
-find_package(OpenGL REQUIRED)
 
 set(IMGGUI_PATH 3rdparty/imgui)
 include_directories( ${IMGGUI_PATH})
@@ -71,9 +69,9 @@ Edrak/src/3D/ICP.cpp
 
 add_library(Edrak ${EDRAK_SRC_FILES})
 target_include_directories(Edrak PUBLIC Edrak/include)
-target_link_libraries(Edrak PRIVATE ${CONAN_LIBS})
-target_link_libraries(Edrak PRIVATE ${Pangolin_LIBRARIES})
-target_link_libraries(Edrak PRIVATE  ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+target_link_libraries(Edrak ${CONAN_LIBS})
+target_link_libraries(Edrak ${Pangolin_LIBRARIES})
+target_link_libraries(Edrak ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 
 

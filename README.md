@@ -1,5 +1,6 @@
 # Edrak
-A toolbox for autonomous perception 
+I have developed this library during reading the [slambook](https://github.com/gaoxiang12/slambook-en)
+  by Xiang Gao, Tao Zhang, Qinrui Yan and Yi Liu.
 
 [![CMake](https://github.com/HemaZ/Edrak/actions/workflows/conan.yml/badge.svg)](https://github.com/HemaZ/Edrak/actions/workflows/conan.yml)
 

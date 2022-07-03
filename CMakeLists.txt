@@ -82,6 +82,13 @@ target_link_libraries(EdrakMain Edrak)
 add_executable(ImgGui_Test tests/Visual/Test_GUI.cpp)
 target_link_libraries(ImgGui_Test ImgGui Edrak)
 
+# Build Examples
+set(EDRAK_BUILD_EXAMPLES ON CACHE BOOL "Build Edrak examples")
+if(EDRAK_BUILD_EXAMPLES)
+  message(STATUS "Compiling Edrak examples")
+  add_subdirectory(Examples/ Examples)
+endif(EDRAK_BUILD_EXAMPLES)
+
 
 enable_testing()
 

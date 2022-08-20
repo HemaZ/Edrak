@@ -39,7 +39,7 @@ jobs:
       run: git clone https://github.com/RainerKuemmerle/g2o.git && cd g2o && cmake -B build && cmake --build build && sudo cmake --install build
 
     - name: Install dependencies
-      run: export CONAN_SYSREQUIRES_MODE=enabled && conan install .. -c tools.system.package_manager:mode=install --build=missing --install-folder=${{github.workspace}}/build
+      run: export CONAN_SYSREQUIRES_MODE=enabled && conan install . -c tools.system.package_manager:mode=install --build=missing --install-folder=${{github.workspace}}/build
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.

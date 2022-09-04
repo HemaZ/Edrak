@@ -63,8 +63,10 @@ Edrak/src/Evaluation/Trajectory.cpp
 Edrak/src/IO/Trajectory.cpp
 Edrak/src/Images/RGBD.cpp
 Edrak/src/Images/Features.cpp
+Edrak/src/Images/Frame.cpp
 Edrak/src/VO/2D/PoseEstmation.cpp
 Edrak/src/3D/ICP.cpp
+Edrak/src/3D/Landmark.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})
@@ -98,7 +100,8 @@ tests/Types/Test_Transformation.cpp
 tests/Visual/test_3D.cpp
 tests/IO/test_trajectory.cpp
 tests/Images/Test_Calibration.cpp
-tests/Images/Test_RGBD.cpp
+# tests/Images/Test_RGBD.cpp
+tests/Images/Test_Frame.cpp
 tests/3rdparty/ceresCurveFitting.cpp
 tests/3rdparty/g2oCurveFitting.cpp
 tests/3rdparty/opencvOrb.cpp
@@ -106,6 +109,7 @@ tests/Images/Test_Features.cpp
 tests/VO/test_PoseEstmation.cpp
 tests/3D/Test_utils.cpp
 tests/3D/Test_ICP.cpp
+tests/3D/Test_Landmark.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})

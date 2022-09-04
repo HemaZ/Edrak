@@ -1,14 +1,41 @@
 #ifndef __EDRAK_IMAGE_FEATURES_H__
 #define __EDRAK_IMAGE_FEATURES_H__
 
+#include <Eigen/Dense>
 #include <cstdint>
+#include <memory>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d/features2d.hpp>
-
 namespace Edrak {
+struct Frame;
+struct Landmark;
 namespace Images {
 namespace Features {
+struct Feature {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+  using SharedPtr = std::shared_ptr<Feature>;
+  //
+  std::weak_ptr<Edrak::Frame> frame;
+  //
+  std::weak_ptr<Edrak::Landmark> landmark;
+  cv::KeyPoint position;
+  bool isOutlier = false;
+  bool matchedOnLeftImg = false;
+  /**
+   * @brief Construct a new Feature object
+   *
+   */
+  Feature() {}
 
+  /**
+   * @brief Construct a new Feature object
+   *
+   * @param frame Associated frame.
+   * @param kp Feature location.
+   */
+  Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &kp)
+      : frame(frame), position(kp) {}
+};
 namespace Descriptors {
 /**
  * @brief Datatype to represent the BRIEF descriptor.

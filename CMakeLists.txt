@@ -67,6 +67,7 @@ Edrak/src/Images/Frame.cpp
 Edrak/src/VO/2D/PoseEstmation.cpp
 Edrak/src/3D/ICP.cpp
 Edrak/src/3D/Landmark.cpp
+Edrak/src/SLAM/Map.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})

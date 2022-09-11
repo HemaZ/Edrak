@@ -7,17 +7,18 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d/features2d.hpp>
 namespace Edrak {
-struct Frame;
+struct StereoFrame;
 struct Landmark;
 namespace Images {
 namespace Features {
 struct Feature {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
   using SharedPtr = std::shared_ptr<Feature>;
-  //
-  std::weak_ptr<Edrak::Frame> frame;
-  //
+  // Frame which contains this feature.
+  std::weak_ptr<Edrak::StereoFrame> frame;
+  // 3D Point location of this feature.
   std::weak_ptr<Edrak::Landmark> landmark;
+  // 2D location of the feature on the frame.
   cv::KeyPoint position;
   bool isOutlier = false;
   bool matchedOnLeftImg = false;
@@ -33,7 +34,7 @@ struct Feature {
    * @param frame Associated frame.
    * @param kp Feature location.
    */
-  Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &kp)
+  Feature(std::shared_ptr<StereoFrame> frame, const cv::KeyPoint &kp)
       : frame(frame), position(kp) {}
 };
 namespace Descriptors {

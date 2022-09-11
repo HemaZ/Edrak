@@ -32,7 +32,7 @@ class EdrakConan(ConanFile):
     #                             conan_basic_setup()''')
 
     def build(self):
-        cmake = CMake(self)
+        cmake = CMake(self, generator="Unix Makefiles")
         cmake.configure(source_folder="Edrak")
         cmake.build()
 

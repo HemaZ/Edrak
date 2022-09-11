@@ -40,7 +40,7 @@ public:
   Frame(uint32_t id, uint64_t timestamp, const Sophus::SE3d &pose,
         const cv::Mat &img);
   /**
-   * @brief
+   * @brief Tcw
    *
    * @return Sophus::SE3d
    */
@@ -67,6 +67,7 @@ public:
 };
 
 struct StereoFrame : public Frame {
+  using SharedPtr = std::shared_ptr<StereoFrame>;
   cv::Mat rightImgData;
   // Right image's features
   std::vector<std::shared_ptr<Edrak::Images::Features::Feature>> featuresRight;

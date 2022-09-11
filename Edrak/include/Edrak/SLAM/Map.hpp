@@ -14,14 +14,15 @@ public:
   using SharedPtr = std::shared_ptr<Map>;
   using LandmarksData =
       std::unordered_map<uint32_t, Edrak::Landmark::SharedPtr>;
-  using KeyFramesData = std::unordered_map<uint32_t, Edrak::Frame::SharedPtr>;
+  using KeyFramesData =
+      std::unordered_map<uint32_t, Edrak::StereoFrame::SharedPtr>;
   Map() {}
   /**
    * @brief
    *
    * @param frame
    */
-  void InsertKeyframe(Frame::SharedPtr frame);
+  void InsertKeyframe(StereoFrame::SharedPtr frame);
 
   /**
    * @brief
@@ -82,9 +83,9 @@ private:
   LandmarksData activeLandmarks;
   KeyFramesData allKeyframes;
   KeyFramesData activeKeyframes;
-  Frame::SharedPtr currentFrame;
+  StereoFrame::SharedPtr currentFrame;
   uint32_t nActiveKeyframes = 7;
-
+  double minDistanceFrame = 0.2;
   void RemoveOldKeyframe();
 };
 

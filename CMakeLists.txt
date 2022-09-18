@@ -68,6 +68,7 @@ Edrak/src/VO/2D/PoseEstmation.cpp
 Edrak/src/3D/ICP.cpp
 Edrak/src/3D/Landmark.cpp
 Edrak/src/SLAM/Map.cpp
+Edrak/src/SLAM/Frontend.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})
@@ -86,7 +87,7 @@ add_executable(ImgGui_Test tests/Visual/Test_GUI.cpp)
 target_link_libraries(ImgGui_Test ImgGui Edrak)
 
 # Build Examples
-set(EDRAK_BUILD_EXAMPLES ON CACHE BOOL "Build Edrak examples")
+set(EDRAK_BUILD_EXAMPLES OFF CACHE BOOL "Build Edrak examples")
 if(EDRAK_BUILD_EXAMPLES)
   message(STATUS "Compiling Edrak examples")
   add_subdirectory(Examples/ Examples)
@@ -111,6 +112,7 @@ tests/VO/test_PoseEstmation.cpp
 tests/3D/Test_utils.cpp
 tests/3D/Test_ICP.cpp
 tests/3D/Test_Landmark.cpp
+tests/SLAM/Test_Frontend.cpp
 )
 
 add_executable(mytest ${TESTS_SRCS})

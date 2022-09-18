@@ -14,7 +14,7 @@ class EdrakConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
-    requires = "boost/1.79.0", "opencv/4.5.5", "eigen/3.3.9", "sophus/22.04.1", "ceres-solver/2.0.0", "catch2/2.13.9", "imgui/1.87", "glfw/3.3.7", "glew/2.2.0", "fmt/8.1.1"
+    requires = "boost/1.79.0", "opencv/4.5.5", "eigen/3.3.9", "sophus/22.04.1", "ceres-solver/2.0.0", "catch2/2.13.9", "imgui/1.87", "glfw/3.3.7", "glew/2.2.0", "fmt/8.1.1", "spdlog/1.10.0"
 
     def config_options(self):
         if self.settings.os == "Windows":

@@ -2,6 +2,7 @@
 #define __CALIBRATION_H__
 #include <eigen3/Eigen/Core>
 #include <opencv2/core.hpp>
+#include <sophus/se3.hpp>
 namespace Edrak {
 namespace Images {
 /**
@@ -44,6 +45,32 @@ using RadTanCoeffsD = RadTanCoeffs<double>;
 cv::Mat Undistort(const cv::Mat &src, const CameraMatD &A,
                   const RadTanCoeffsD &rad_tan);
 } // namespace Images
+
+/**
+ * @brief
+ *
+ */
+struct CameraModel {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+  using SharedPtr = std::shared_ptr<CameraModel>;
+  Images::CameraMatD calibration;
+  Sophus::SE3d pose;
+  Sophus::SE3d poseInv;
+  CameraModel(const Images::CameraMatD &calib) : calibration(calib) {}
+  CameraModel(double fx, double fy, double cx, double cy,
+              const Sophus::SE3d &cameraPose) {
+    calibration = {fx, fy, cx, cy};
+    pose = cameraPose;
+    poseInv = cameraPose.inverse();
+  }
+  CameraModel() {}
+};
+
+struct StereoCamera {
+  CameraModel leftCamera;
+  CameraModel rightCamera;
+  double baseLine;
+};
 
 } // namespace Edrak
 

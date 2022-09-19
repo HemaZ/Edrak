@@ -4,7 +4,9 @@
 #include "Edrak/Images/Calibration.hpp"
 #include "Edrak/Images/Features.hpp"
 #include "Edrak/Images/Frame.hpp"
-#include "Map.hpp"
+#include "Edrak/Images/Triangulation.hpp"
+#include "Edrak/SLAM/Map.hpp"
+#include "Edrak/Visual/Viewer.hpp"
 #include <opencv2/features2d.hpp>
 namespace Edrak {
 class Backend;
@@ -79,10 +81,7 @@ public:
    * @param left Pinhole camera model represents the left camera.
    * @param right Pinhole camera model represents the right camera.
    */
-  void SetCameras(Images::CameraMatD left, Images::CameraMatD right) {
-    cameraLeft_ = left;
-    cameraRight_ = right;
-  }
+  void SetCamera(const StereoCamera &stereoCamera) { camera_ = stereoCamera; }
 
 private:
   bool Track();
@@ -95,13 +94,15 @@ private:
 
   bool InsertKeyframe();
 
+  /**
+   * @brief Initialize SLAM with Stereo frame.
+   * @return bool if initialization is successful.
+   */
   bool StereoInit();
 
-  int DetectFeatures();
-
-  int FindFeaturesInRight();
-
-  bool BuildInitMap();
+  bool BuildInitMap(const Images::Features::Matches2D &frameMatches,
+                    const Images::Features::KeyPoints::KeyPoints &,
+                    const Images::Features::KeyPoints::KeyPoints &);
 
   int TriangulateNewPoints();
 
@@ -112,7 +113,7 @@ private:
   std::shared_ptr<Backend> backend_;
   std::shared_ptr<Viewer> viewer_;
   FrontendState state_ = FrontendState::INITIALIZING;
-  Images::CameraMatD cameraLeft_, cameraRight_;
+  StereoCamera camera_;
   Settings settings_;
 
   // Logger

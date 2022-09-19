@@ -59,6 +59,7 @@ Edrak/src/IO/Utils.cpp
 Edrak/src/Images/TemplateMatching.cpp
 Edrak/src/Images/Calibration.cpp
 Edrak/src/Visual/3D.cpp
+Edrak/src/Visual/Viewer.cpp
 Edrak/src/Evaluation/Trajectory.cpp
 Edrak/src/IO/Trajectory.cpp
 Edrak/src/Images/RGBD.cpp
@@ -69,6 +70,7 @@ Edrak/src/3D/ICP.cpp
 Edrak/src/3D/Landmark.cpp
 Edrak/src/SLAM/Map.cpp
 Edrak/src/SLAM/Frontend.cpp
+Edrak/src/SLAM/Backend.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})

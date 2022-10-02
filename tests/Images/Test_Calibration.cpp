@@ -31,6 +31,7 @@ TEST_CASE("Camera Matrix from Matrix", "CameraMatrix") {
   REQUIRE(camMatfromMat.fy == Approx(camMat.fy).margin(0.00001));
   REQUIRE(camMatfromMat.cx == Approx(camMat.cx).margin(0.00001));
   REQUIRE(camMatfromMat.cy == Approx(camMat.cy).margin(0.00001));
+  REQUIRE(mat == camMatfromMat.K());
 }
 
 TEST_CASE("Undistort", "Undistort") {

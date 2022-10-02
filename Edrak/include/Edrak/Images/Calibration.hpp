@@ -1,6 +1,6 @@
 #ifndef __CALIBRATION_H__
 #define __CALIBRATION_H__
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
 namespace Edrak {
@@ -22,6 +22,11 @@ public:
   T v(T y) const { return fy * y + cy; }
   static CameraMatrix<T> FromMat(const Eigen::Matrix<T, 3, 3> &mat) {
     return CameraMatrix<T>{mat(0, 0), mat(1, 1), mat(0, 2), mat(1, 2)};
+  }
+  Eigen::Matrix<T, 3, 3> K() {
+    Eigen::Matrix<T, 3, 3> K_;
+    K_ << fx, 0, cx, 0, fy, cy, 0, 0, 1;
+    return K_;
   }
 };
 using CameraMatF = CameraMatrix<float>;

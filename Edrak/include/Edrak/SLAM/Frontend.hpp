@@ -23,6 +23,12 @@ struct FrontendSettings {
   int nFeaturesBadTracking = 20;
   // Number of features to add new keyframe.
   int nFeaturesNewKeyframe = 80;
+  // Number of iteration for current frame pose estimation.
+  int nIterationsPoseEstimation = 4;
+  // Chi2 (Mahalanobis distance) Threshold to consider the feature is outlier.
+  double chi2Threshold = 5.991;
+  // Maximum number of iteration for g2o optimizer.
+  int g2oOptimizerNIter = 10;
 };
 
 /**
@@ -113,6 +119,7 @@ private:
   std::shared_ptr<Backend> backend_;
   std::shared_ptr<Viewer> viewer_;
   FrontendState state_ = FrontendState::INITIALIZING;
+  Sophus::SE3d relativeMotion_;
   StereoCamera camera_;
   Settings settings_;
 

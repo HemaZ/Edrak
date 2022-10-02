@@ -77,7 +77,7 @@ add_library(Edrak ${EDRAK_SRC_FILES})
 target_include_directories(Edrak PUBLIC Edrak/include)
 target_link_libraries(Edrak ${CONAN_LIBS})
 target_link_libraries(Edrak ${Pangolin_LIBRARIES})
-target_link_libraries(Edrak ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+target_link_libraries(Edrak ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ${G2O_SOLVER_CSPARSE})
 
 
 
@@ -89,7 +89,7 @@ add_executable(ImgGui_Test tests/Visual/Test_GUI.cpp)
 target_link_libraries(ImgGui_Test ImgGui Edrak)
 
 # Build Examples
-set(EDRAK_BUILD_EXAMPLES OFF CACHE BOOL "Build Edrak examples")
+set(EDRAK_BUILD_EXAMPLES ON CACHE BOOL "Build Edrak examples")
 if(EDRAK_BUILD_EXAMPLES)
   message(STATUS "Compiling Edrak examples")
   add_subdirectory(Examples/ Examples)

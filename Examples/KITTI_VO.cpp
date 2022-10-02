@@ -1,14 +1,7 @@
-#include "../catch.hpp"
 #include "Edrak/IO/MonoReader.hpp"
 #include "Edrak/SLAM/Frontend.hpp"
-#include <iostream>
-
-TEST_CASE("Test StereoInit null Frame", "Frontend::StereoInit") {
-  // Edrak::Frontend fe;
-  // REQUIRE_FALSE(fe.AddFrame(nullptr));
-}
-
-TEST_CASE("Test StereoInit", "Frontend::StereoInit") {
+#include <memory>
+int main(int argc, char const *argv[]) {
   std::string data_dir = EDRAK_TEST_DATA_DIR;
   std::string imgs_path = data_dir + "KITTI/VO/14";
   const int N_FRAMES = 100;
@@ -18,6 +11,9 @@ TEST_CASE("Test StereoInit", "Frontend::StereoInit") {
 
   Edrak::StereoCamera cam{kittiPinholeCamera, kittiPinholeCamera, 0.54};
   Edrak::Frontend fe;
+  Edrak::Map::SharedPtr map = std::make_shared<Edrak::Map>();
+  fe.SetMap(map);
+
   fe.SetCamera(cam);
   Edrak::IO::MonoReader leftReader{imgs_path + "/image_0/*.png",
                                    Edrak::IO::ImageType::GRAY, false};
@@ -28,7 +24,11 @@ TEST_CASE("Test StereoInit", "Frontend::StereoInit") {
     Edrak::StereoFrame::SharedPtr frame = Edrak::StereoFrame::CreateFrame();
     leftReader.NextFrame(frame->imgData);
     rightReader.NextFrame(frame->rightImgData);
-    REQUIRE(frame->imgData.size() == frame->rightImgData.size());
-    fe.AddFrame(frame);
+    if (frame->imgData.size() == frame->rightImgData.size()) {
+      fe.AddFrame(frame);
+    } else {
+      break;
+    }
   }
+  return 0;
 }

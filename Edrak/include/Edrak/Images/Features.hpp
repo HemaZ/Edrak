@@ -90,17 +90,31 @@ using Matches2D = std::vector<DMatch>;
  */
 void ORB(const cv::Mat &img, KeyPoints::KeyPoints &kps, cv::Mat &descriptors);
 /**
- * @brief
- *
- * @param img1
- * @param img2
- * @param kps1
- * @param kps2
- * @param matches
+ * @brief Extract ORB features and matches between two images.
+ * @param[in] img1 Input image.
+ * @param[in] img2 Second input image.
+ * @param[out] keyPoints1 Extracted ORB keypoints from first input image.
+ * @param[out] keyPoints2 Extracted ORB keypoints from second input image.
+ * @param[out] matches Matched keypoints from first and second keypoints.
  */
 void ExtractORBMatches(const cv::Mat &img1, const cv::Mat &img2,
                        KeyPoints::KeyPoints &kps1, KeyPoints::KeyPoints &kps2,
                        Matches2D &matches);
+
+/**
+ * @brief Extract ORB features and matches between two images.
+ * @param[in] img1 Input image.
+ * @param[in] img2 Second input image.
+ * @param[out] keyPoints1 Extracted ORB keypoints from first input image.
+ * @param[out] keyPoints2 Extracted ORB keypoints from second input image.
+ * @param[out] descriptors1 Extracted ORB descriptors from first input image.
+ * @param[out] descriptors2 Extracted ORB descriptors from second input image
+ * @param[out] matches Matched keypoints from first and second keypoints.
+ */
+void ExtractORBMatches(const cv::Mat &img1, const cv::Mat &img2,
+                       KeyPoints::KeyPoints &keyPoints1,
+                       KeyPoints::KeyPoints &keyPoints2, cv::Mat &descriptors1,
+                       cv::Mat &descriptors2, Matches2D &matches);
 /**
  * @brief Keypoints matching using descriptors and BruteForce-Hamming Algorithm.
  *

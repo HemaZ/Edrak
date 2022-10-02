@@ -29,6 +29,15 @@ void ExtractORBMatches(const cv::Mat &img1, const cv::Mat &img2,
   FeaturesMatching(descriptors1, descriptors2, matches);
 }
 
+void ExtractORBMatches(const cv::Mat &img1, const cv::Mat &img2,
+                       KeyPoints::KeyPoints &keyPoints1,
+                       KeyPoints::KeyPoints &keyPoints2, cv::Mat &descriptors1,
+                       cv::Mat &descriptors2, Matches2D &matches) {
+  ORB(img1, keyPoints1, descriptors1);
+  ORB(img2, keyPoints2, descriptors2);
+  FeaturesMatching(descriptors1, descriptors2, matches);
+}
+
 void FeaturesMatching(const cv::Mat &descriptors1, const cv::Mat &descriptors2,
                       Matches2D &matches) {
   cv::Ptr<cv::DescriptorMatcher> matcher =

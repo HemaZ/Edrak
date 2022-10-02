@@ -18,6 +18,8 @@ else()
     add_compile_options()
 endif()
 
+option(BUILD_TOOLS "Build Edrak Tools" ON)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
@@ -52,6 +54,15 @@ ${IMGGUI_PATH}/backends/imgui_impl_opengl3.cpp
 add_library(ImgGui ${IMGUI_SRCS})
 target_link_libraries(ImgGui ${CONAN_LIBS})
 
+#DBOW3
+find_package(DBoW3) 
+if(${DBoW3_FOUND})
+  message(STATUS "Found DBoW3")
+else()
+  add_subdirectory(3rdparty/DBow3)
+  find_package(DBoW3 REQUIRED) 
+endif()
+
 
 # Src files
 set(EDRAK_SRC_FILES Edrak/src/IO/MonoReader.cpp
@@ -78,6 +89,7 @@ target_include_directories(Edrak PUBLIC Edrak/include)
 target_link_libraries(Edrak ${CONAN_LIBS})
 target_link_libraries(Edrak ${Pangolin_LIBRARIES})
 target_link_libraries(Edrak ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+target_link_libraries(Edrak DBoW3)
 
 
 
@@ -95,6 +107,10 @@ if(EDRAK_BUILD_EXAMPLES)
   add_subdirectory(Examples/ Examples)
 endif(EDRAK_BUILD_EXAMPLES)
 
+# Build Tools
+if(BUILD_TOOLS)
+  add_subdirectory(tools)
+endif()
 
 enable_testing()
 

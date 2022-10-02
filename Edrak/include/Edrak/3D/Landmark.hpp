@@ -1,6 +1,6 @@
 #ifndef __EDRAK_3D_LANDMARK_H__
 #define __EDRAK_3D_LANDMARK_H__
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <list>
 #include <memory>
 #include <mutex>

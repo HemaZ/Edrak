@@ -1,8 +1,8 @@
 #ifndef __EDRAK__Transformation_H__
 #define __EDRAK__Transformation_H__
 #include "Edrak/Exceptions/Exceptions.hpp"
-#include "eigen3/Eigen/Core"
-#include "eigen3/Eigen/Geometry"
+#include "Eigen/Core"
+#include "Eigen/Geometry"
 #define SOPHUS_USE_BASIC_LOGGING
 #include "sophus/se3.hpp"
 #include <vector>

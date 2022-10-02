@@ -1,7 +1,7 @@
 #ifndef __EDRAK_IMAGES_TRIANGULATION_HPP__
 #define __EDRAK_IMAGES_TRIANGULATION_HPP__
 #include "sophus/se3.hpp"
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <vector>
 namespace Edrak {
 namespace Images {

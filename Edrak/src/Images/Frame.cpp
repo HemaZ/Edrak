@@ -13,4 +13,12 @@ std::shared_ptr<Frame> Frame::CreateFrame() {
   return ptr;
 }
 
+std::shared_ptr<StereoFrame> StereoFrame::CreateFrame() {
+  static uint32_t newFrameId = 0;
+  std::shared_ptr<StereoFrame> ptr = std::make_shared<StereoFrame>();
+  ptr->frameId = newFrameId;
+  ++newFrameId;
+  return ptr;
+}
+
 } // namespace Edrak

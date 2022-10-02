@@ -28,6 +28,8 @@ public:
   cv::Mat imgData;
   // Image's features
   std::vector<std::shared_ptr<Edrak::Images::Features::Feature>> features;
+  // Image's ORB descriptors
+  cv::Mat orbDescriptors;
   Frame() {}
   /**
    * @brief Construct a new Frame object
@@ -71,6 +73,9 @@ struct StereoFrame : public Frame {
   cv::Mat rightImgData;
   // Right image's features
   std::vector<std::shared_ptr<Edrak::Images::Features::Feature>> featuresRight;
+  // Right images orb descriptors
+  cv::Mat rightImgDescriptors;
+  static std::shared_ptr<StereoFrame> CreateFrame();
 };
 } // namespace Edrak
 

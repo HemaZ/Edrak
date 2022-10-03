@@ -33,7 +33,8 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 # G2o
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/3rdparty/g2o/cmake_modules)
 find_package(G2O REQUIRED)
-include_directories(${G2O_INCLUDE_DIR})
+find_package(CSparse REQUIRED)
+include_directories(${G2O_INCLUDE_DIR} ${CSPARSE_INCLUDE_DIR})
 
 
 set(IMGGUI_PATH 3rdparty/imgui)

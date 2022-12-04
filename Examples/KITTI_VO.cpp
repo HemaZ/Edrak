@@ -1,5 +1,6 @@
 #include "Edrak/IO/MonoReader.hpp"
 #include "Edrak/SLAM/Frontend.hpp"
+#include "Edrak/SLAM/Viewer.hpp"
 #include <memory>
 int main(int argc, char const *argv[]) {
   std::string data_dir = EDRAK_TEST_DATA_DIR;
@@ -13,6 +14,11 @@ int main(int argc, char const *argv[]) {
   Edrak::Frontend fe;
   Edrak::Map::SharedPtr map = std::make_shared<Edrak::Map>();
   fe.SetMap(map);
+
+  // Create Viewer
+  // Edrak::Viewer::SharedPtr viewer = std::make_shared<Edrak::Viewer>();
+  // viewer->SetMap(map);
+  // fe.SetViewer(viewer);
 
   fe.SetCamera(cam);
   Edrak::IO::MonoReader leftReader{imgs_path + "/image_0/*.png",

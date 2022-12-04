@@ -1,5 +1,6 @@
 #include "Edrak/SLAM/Frontend.hpp"
 #include "Edrak/SLAM/Backend.hpp"
+#include "ceres_problems.hpp"
 #include "g2o_types.h"
 namespace Edrak {
 
@@ -22,15 +23,9 @@ bool Frontend::AddFrame(StereoFrame::SharedPtr frame) {
   return ret;
 }
 
-bool Frontend::StereoInit() {
-  using namespace Images::Features;
-  if (currentFrame_ == nullptr) {
-    logger_->error("Current frame is nullptr !!");
-    return false;
-  }
+bool Frontend::DetectFeatures(KeyPoints::KeyPoints &kpsL,
+                              KeyPoints::KeyPoints &kpsR, Matches2D &matches) {
   // Extract ORB features from left & right images.
-  KeyPoints::KeyPoints kpsL, kpsR;
-  Matches2D matches;
   logger_->info("Extracting ORB features from left and right image");
   Images::Features::ExtractORBMatches(
       currentFrame_->imgData, currentFrame_->rightImgData, kpsL, kpsR,
@@ -64,26 +59,44 @@ bool Frontend::StereoInit() {
     currentFrame_->featuresRight.push_back(feat);
   }
 
+  return true;
+}
+
+bool Frontend::StereoInit() {
+  using namespace Images::Features;
+  if (currentFrame_ == nullptr) {
+    logger_->error("Current frame is nullptr !!");
+    return false;
+  }
+
+  // Extract ORB features from left & right images.
+  KeyPoints::KeyPoints kpsL, kpsR;
+  Matches2D matches;
+  DetectFeatures(kpsL, kpsR, matches);
+
+  // Return false if number of ORB matches is very low
   if (matches.size() < settings_.nFeaturesToInit) {
     logger_->info("Number of stereo frame features matching = {} is less than "
                   "nFeaturesToInit = {}",
                   matches.size(), settings_.nFeaturesToInit);
     return false;
   }
+
   // Building inital map
   bool buildMap = BuildInitMap(matches, kpsL, kpsR);
-  if (buildMap) {
-    logger_->info("Building InitMap success. Tracking");
-    state_ = FrontendState::TRACKING;
-    if (viewer_) {
-      logger_->info("submitting current frame and map to the viewer.");
-      viewer_->AddCurrentFrame(currentFrame_);
-      viewer_->UpdateMap();
-    }
-  } else {
+  if (!buildMap) {
     logger_->warn("Building initMap failed");
     return false;
   }
+
+  logger_->info("Building InitMap success. Tracking");
+  state_ = FrontendState::TRACKING;
+  if (viewer_) {
+    logger_->info("submitting current frame and map to the viewer.");
+    viewer_->AddCurrentFrame(currentFrame_);
+    viewer_->UpdateMap();
+  }
+
   return true;
 }
 
@@ -131,7 +144,7 @@ bool Frontend::Track() {
     currentFrame_->Pose(relativeMotion_ * prevFrame_->Pose());
   }
   int nTrackedPointsLastFrame = TrackLastFrame();
-  int nTrackedPoints = EstimateCurrentPose();
+  int nTrackedPoints = EstimateCurrentPoseCeres();
   if (nTrackedPoints > settings_.nFeaturesTracking) {
     state_ = FrontendState::TRACKING;
   } else if (nTrackedPoints > settings_.nFeaturesBadTracking) {
@@ -171,6 +184,46 @@ int Frontend::TrackLastFrame() {
     currentFrame_->features.push_back(feat);
   }
   return nTrackedPoints;
+}
+
+int Frontend::EstimateCurrentPoseCeres() {
+  ceres::Problem problem;
+  Sophus::SE3d pose = currentFrame_->Pose();
+  Eigen::Vector3d translation = pose.translation();
+  Eigen::Quaternion<double> quat(pose.so3().params());
+
+  double T[] = {quat.w(),        quat.x(),        quat.y(),       quat.z(),
+                translation.x(), translation.y(), translation.z()};
+  for (size_t i = 0; i < currentFrame_->features.size(); i++) {
+    // We get a shared_ptr of the weak ptr. Because the raw ptr could
+    // have been destroyed from another thread.
+    auto landmark = currentFrame_->features[i]->landmark.lock();
+    if (!landmark) {
+      // Continue if the feature is not associated with a landmark.
+      continue;
+    }
+    double x = currentFrame_->features[i]->position.pt.x;
+    double y = currentFrame_->features[i]->position.pt.y;
+    Eigen::Vector3d position3D = landmark->Position();
+    // We get a shared_ptr of the weak ptr. Because the raw ptr could
+    // have been destroyed from another thread.
+    ceres::CostFunction *cost_function = ReprojectionError::Create(
+        x, y, camera_.leftCamera.calibration, position3D.data());
+    problem.AddResidualBlock(cost_function, nullptr, T);
+  }
+  // Make Ceres automatically detect the bundle structure. Note that the
+  // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
+  // for standard bundle adjustment problems.
+  ceres::Solver::Options options;
+  options.linear_solver_type = ceres::DENSE_SCHUR;
+  options.minimizer_progress_to_stdout = true;
+
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, &problem, &summary);
+  std::cout << summary.FullReport() << "\n";
+  // Sophus::SE3d new_pose = createSE3(T);
+  currentFrame_->Pose(pose);
+  return 0;
 }
 
 int Frontend::EstimateCurrentPose() {
@@ -264,9 +317,40 @@ int Frontend::EstimateCurrentPose() {
   }
   return features.size() - nOutliers;
 }
+
 bool Frontend::InsertKeyframe() {
   // TODO
-  return false;
+  logger_->info("Setting Frame {} as a keyframe", currentFrame_->frameId);
+  currentFrame_->isKeyFrame = true;
+  map_->InsertKeyframe(currentFrame_);
+  SetObservationsForKeyFrame();
+  // Finding new features
+  KeyPoints::KeyPoints kpsL, kpsR;
+  Matches2D matches;
+  DetectFeatures(kpsL, kpsR, matches);
+  // Creating new Landmarks.
+  TriangulateNewPoints();
+
+  // Update Backend
+  backend_->UpdateMap();
+
+  // Update viewer with new keyframe
+  if (viewer_)
+    viewer_->UpdateMap();
+
+  return true;
 }
+
+void Frontend::SetObservationsForKeyFrame() {
+  for (const auto &feat : currentFrame_->features) {
+    auto landmark = feat->landmark.lock();
+    if (landmark) {
+      landmark->AddObservation(feat);
+    }
+  }
+}
+
+int Frontend::TriangulateNewPoints() {}
+
 bool Frontend::Reset() { return false; }
 } // namespace Edrak

@@ -6,11 +6,13 @@
 #include "Edrak/Images/Frame.hpp"
 #include "Edrak/Images/Triangulation.hpp"
 #include "Edrak/SLAM/Map.hpp"
-#include "Edrak/Visual/Viewer.hpp"
+#include "Edrak/SLAM/Viewer.hpp"
 #include <opencv2/features2d.hpp>
+
 namespace Edrak {
 class Backend;
 class Viewer;
+using namespace Images::Features;
 
 struct FrontendSettings {
   // Number of features to keep.
@@ -24,7 +26,7 @@ struct FrontendSettings {
   // Number of features to add new keyframe.
   int nFeaturesNewKeyframe = 80;
   // Number of iteration for current frame pose estimation.
-  int nIterationsPoseEstimation = 4;
+  int nIterationsPoseEstimation = 2;
   // Chi2 (Mahalanobis distance) Threshold to consider the feature is outlier.
   double chi2Threshold = 5.991;
   // Maximum number of iteration for g2o optimizer.
@@ -44,7 +46,7 @@ public:
   /**
    * @brief Construct a new Frontend for SLAM
    */
-  Frontend() {
+  Frontend() : map_{std::make_shared<Map>()} {
     logger_ = spdlog::basic_logger_mt("slam_frontend_logger",
                                       "logs/slam/frontend.txt");
   }
@@ -90,6 +92,17 @@ public:
   void SetCamera(const StereoCamera &stereoCamera) { camera_ = stereoCamera; }
 
 private:
+  /**
+   * @brief Finds ORB features in left and tight image, Does ORB matching and
+   * returns the matched features.
+   *
+   * @param kpsL Output Left image's keypoints.
+   * @param kpsR Output Right image's keypoints.
+   * @param matches Output ORB matches.
+   * @return boolean if success.
+   */
+  bool DetectFeatures(KeyPoints::KeyPoints &kpsL, KeyPoints::KeyPoints &kpsR,
+                      Matches2D &matches);
   bool Track();
 
   bool Reset();
@@ -98,7 +111,11 @@ private:
 
   int EstimateCurrentPose();
 
+  int EstimateCurrentPoseCeres();
+
   bool InsertKeyframe();
+
+  void SetObservationsForKeyFrame();
 
   /**
    * @brief Initialize SLAM with Stereo frame.
@@ -111,8 +128,6 @@ private:
                     const Images::Features::KeyPoints::KeyPoints &);
 
   int TriangulateNewPoints();
-
-  void SetObservationsForKeyFrame();
 
   StereoFrame::SharedPtr currentFrame_, prevFrame_;
   Map::SharedPtr map_;

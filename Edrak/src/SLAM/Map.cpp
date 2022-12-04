@@ -4,17 +4,19 @@
 
 namespace Edrak {
 void Map::InsertKeyframe(StereoFrame::SharedPtr frame) {
+  std::lock_guard<std::mutex> lock(dataMutex);
   currentFrame = frame;
-  allKeyframes[frame->keyFrameId] = frame;
-  activeKeyframes[frame->keyFrameId] = frame;
+  allKeyframes.insert({frame->keyFrameId, frame});
+  activeKeyframes.insert({frame->keyFrameId, frame});
   if (activeKeyframes.size() > nActiveKeyframes) {
     RemoveOldKeyframe();
   }
 }
 
 void Map::InsertLandmark(Landmark::SharedPtr landmark) {
-  allLandmarks[landmark->id] = landmark;
-  activeLandmarks[landmark->id] = landmark;
+  std::lock_guard<std::mutex> lock(dataMutex);
+  allLandmarks.insert({landmark->id, landmark});
+  activeLandmarks.insert({landmark->id, landmark});
 }
 
 void Map::RemoveOldKeyframe() {

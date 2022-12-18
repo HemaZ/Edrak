@@ -7,6 +7,9 @@ namespace Edrak {
 bool Frontend::AddFrame(StereoFrame::SharedPtr frame) {
   currentFrame_ = frame;
   bool ret = false;
+  if (voPtr) {
+    voPtr->Process(currentFrame_->imgData);
+  }
   switch (state_) {
   case FrontendState::INITIALIZING:
     ret = StereoInit();
@@ -34,6 +37,18 @@ bool Frontend::DetectFeatures(KeyPoints::KeyPoints &kpsL,
   logger_->info("Matched {} keypoints between left and right image.",
                 matches.size());
 
+  // for (const auto &match : matches) {
+  //   int lKpIdx = match.queryIdx;
+  //   int rKpIdx = match.trainIdx;
+  //   auto featLeft =
+  //   std::make_shared<Images::Features::Feature>(currentFrame_,
+  //                                                               kpsL[lKpIdx]);
+  //   currentFrame_->features.push_back(featLeft);
+  //   auto featRight =
+  //       std::make_shared<Images::Features::Feature>(currentFrame_, kpsR[i]);
+  //   feat->matchedOnLeftImg = true;
+  //   currentFrame_->featuresRight.push_back(featRight);
+  // }
   // Setting left image features.
   logger_->info("Setting the left image features.");
   for (size_t i = 0; i < kpsL.size(); i++) {
@@ -117,8 +132,12 @@ bool Frontend::BuildInitMap(
     int rKpIdx = matches[i].trainIdx;
     auto pointLeft = leftKps[lKpIdx].pt;
     auto pointRight = rightKps[rKpIdx].pt;
-    bool triangSuccess =
-        Images::Triangulation(poses, {pointLeft, pointRight}, positionWorld);
+    std::vector<cv::Point2f> points{
+        cv::Point2f(camera_.leftCamera.calibration.x(pointLeft.x),
+                    camera_.leftCamera.calibration.y(pointLeft.y)),
+        cv::Point2f(camera_.rightCamera.calibration.x(pointRight.x),
+                    camera_.rightCamera.calibration.y(pointRight.y))};
+    bool triangSuccess = Images::Triangulation(poses, points, positionWorld);
     if (triangSuccess && positionWorld[2] > 0) {
       auto newLandmark = Edrak::Landmark::CreateLandmark();
       newLandmark->Position(positionWorld);
@@ -141,20 +160,25 @@ bool Frontend::BuildInitMap(
 
 bool Frontend::Track() {
   if (prevFrame_) {
-    currentFrame_->Pose(relativeMotion_ * prevFrame_->Pose());
+    Sophus::SE3d poseEstimRelativeMotion = relativeMotion_ * prevFrame_->Pose();
+    const Sophus::SE3d poseEstim5PtsAlg = voPtr->Pose();
+    currentFrame_->Pose(poseEstim5PtsAlg);
   }
   int nTrackedPointsLastFrame = TrackLastFrame();
   int nTrackedPoints = EstimateCurrentPoseCeres();
-  if (nTrackedPoints > settings_.nFeaturesTracking) {
+
+  if (nTrackedPointsLastFrame > settings_.nFeaturesTracking) {
     state_ = FrontendState::TRACKING;
-  } else if (nTrackedPoints > settings_.nFeaturesBadTracking) {
+  } else if (nTrackedPointsLastFrame > settings_.nFeaturesBadTracking) {
     state_ = FrontendState::BAD_TRACKING;
   } else {
     state_ = FrontendState::LOST;
   }
 
-  if (nTrackedPoints < settings_.nFeaturesNewKeyframe) {
+  if (nTrackedPointsLastFrame < settings_.nFeaturesNewKeyframe) {
+    currentFrame_->features.clear();
     InsertKeyframe();
+    state_ = FrontendState::TRACKING;
   }
   relativeMotion_ = currentFrame_->Pose() * prevFrame_->Pose().inverse();
   if (viewer_) {
@@ -170,11 +194,16 @@ int Frontend::TrackLastFrame() {
                         currentFrame_->orbDescriptors);
   logger_->debug("Extracted {} features from current frame", currentKps.size());
 
-  Edrak::Images::Features::Matches2D matches;
+  Edrak::Images::Features::Matches2D unfilteredMatches, matches;
   Images::Features::FeaturesMatching(prevFrame_->orbDescriptors,
-                                     currentFrame_->orbDescriptors, matches);
+                                     currentFrame_->orbDescriptors,
+                                     unfilteredMatches);
+  Images::Features::FilterMatches(unfilteredMatches, matches, 0.4);
   int nTrackedPoints = matches.size();
   logger_->info("Number of tracked points {}", nTrackedPoints);
+  cv::Mat matchedDescriptors(nTrackedPoints, 32,
+                             currentFrame_->orbDescriptors.type());
+  int i = 0;
   for (const auto &match : matches) {
     int iCurrent = match.trainIdx;
     int iPrev = match.queryIdx;
@@ -182,7 +211,10 @@ int Frontend::TrackLastFrame() {
         currentFrame_, currentKps[iCurrent]);
     feat->landmark = prevFrame_->features[iPrev]->landmark;
     currentFrame_->features.push_back(feat);
+    currentFrame_->orbDescriptors.row(iCurrent).copyTo(
+        matchedDescriptors.row(i++));
   }
+  currentFrame_->orbDescriptors = matchedDescriptors;
   return nTrackedPoints;
 }
 
@@ -221,9 +253,13 @@ int Frontend::EstimateCurrentPoseCeres() {
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
-  // Sophus::SE3d new_pose = createSE3(T);
-  currentFrame_->Pose(pose);
-  return 0;
+
+  Eigen::Quaternion<double> quatEst(T[0], T[1], T[2], T[3]);
+  Eigen::Vector3d translationEst(T[4], T[5], T[6]);
+
+  Sophus::SE3d new_pose(quatEst, translationEst);
+  currentFrame_->Pose(new_pose);
+  return currentFrame_->features.size();
 }
 
 int Frontend::EstimateCurrentPose() {
@@ -243,7 +279,7 @@ int Frontend::EstimateCurrentPose() {
   optimizer.addVertex(vertexPose);
 
   // Get Left Camera Intrinsics Matrix K
-  Eigen::Matrix3d K = camera_.leftCamera.calibration.K();
+  const Eigen::Matrix3d K = camera_.leftCamera.calibration.K();
 
   // Create edges between current frame and landmarks.
   int edgeIdx = 1;
@@ -319,7 +355,8 @@ int Frontend::EstimateCurrentPose() {
 }
 
 bool Frontend::InsertKeyframe() {
-  // TODO
+  // note. This function need to be revisited.
+  // DetectFeatures and TriangulateNewPoints
   logger_->info("Setting Frame {} as a keyframe", currentFrame_->frameId);
   currentFrame_->isKeyFrame = true;
   map_->InsertKeyframe(currentFrame_);
@@ -329,7 +366,8 @@ bool Frontend::InsertKeyframe() {
   Matches2D matches;
   DetectFeatures(kpsL, kpsR, matches);
   // Creating new Landmarks.
-  TriangulateNewPoints();
+  BuildInitMap(matches, kpsL, kpsR);
+  // TriangulateNewPoints();
 
   // Update Backend
   backend_->UpdateMap();
@@ -350,7 +388,43 @@ void Frontend::SetObservationsForKeyFrame() {
   }
 }
 
-int Frontend::TriangulateNewPoints() {}
+int Frontend::TriangulateNewPoints() {
+  std::vector<Sophus::SE3d> poses{camera_.leftCamera.pose,
+                                  camera_.rightCamera.pose};
+  Sophus::SE3d current_pose_Twc = currentFrame_->Pose().inverse();
+  int cnt_triangulated_pts = 0;
+  for (size_t i = 0; i < currentFrame_->features.size(); ++i) {
+    if (currentFrame_->features[i]->landmark.expired() &&
+        currentFrame_->featuresRight[i] != nullptr) {
+
+      std::vector<cv::Point2f> points{
+          cv::Point2f(camera_.leftCamera.calibration.x(
+                          currentFrame_->features[i]->position.pt.x),
+                      camera_.leftCamera.calibration.y(
+                          currentFrame_->features[i]->position.pt.y)),
+          cv::Point2f(camera_.rightCamera.calibration.x(
+                          currentFrame_->featuresRight[i]->position.pt.x),
+                      camera_.rightCamera.calibration.y(
+                          currentFrame_->featuresRight[i]->position.pt.y))};
+      Vec3 pworld = Vec3::Zero();
+
+      if (Images::Triangulation(poses, points, pworld) && pworld[2] > 0) {
+        auto new_map_point = Landmark::CreateLandmark();
+        pworld = current_pose_Twc * pworld;
+        new_map_point->Position(pworld);
+        new_map_point->AddObservation(currentFrame_->features[i]);
+        new_map_point->AddObservation(currentFrame_->featuresRight[i]);
+
+        currentFrame_->features[i]->landmark = new_map_point;
+        currentFrame_->featuresRight[i]->landmark = new_map_point;
+        map_->InsertLandmark(new_map_point);
+        cnt_triangulated_pts++;
+      }
+    }
+  }
+  logger_->info("new landmarks:  ", cnt_triangulated_pts);
+  return cnt_triangulated_pts;
+}
 
 bool Frontend::Reset() { return false; }
 } // namespace Edrak

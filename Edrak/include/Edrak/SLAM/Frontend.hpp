@@ -7,8 +7,8 @@
 #include "Edrak/Images/Triangulation.hpp"
 #include "Edrak/SLAM/Map.hpp"
 #include "Edrak/SLAM/Viewer.hpp"
+#include "Edrak/VO/2D/PoseEstmation.hpp"
 #include <opencv2/features2d.hpp>
-
 namespace Edrak {
 class Backend;
 class Viewer;
@@ -26,7 +26,7 @@ struct FrontendSettings {
   // Number of features to add new keyframe.
   int nFeaturesNewKeyframe = 80;
   // Number of iteration for current frame pose estimation.
-  int nIterationsPoseEstimation = 2;
+  int nIterationsPoseEstimation = 4;
   // Chi2 (Mahalanobis distance) Threshold to consider the feature is outlier.
   double chi2Threshold = 5.991;
   // Maximum number of iteration for g2o optimizer.
@@ -89,7 +89,10 @@ public:
    * @param left Pinhole camera model represents the left camera.
    * @param right Pinhole camera model represents the right camera.
    */
-  void SetCamera(const StereoCamera &stereoCamera) { camera_ = stereoCamera; }
+  void SetCamera(const StereoCamera &stereoCamera) {
+    camera_ = stereoCamera;
+    voPtr = std::make_shared<VO::PoseEstmation>(camera_.leftCamera.calibration);
+  }
 
 private:
   /**
@@ -140,6 +143,9 @@ private:
 
   // Logger
   std::shared_ptr<spdlog::logger> logger_;
+
+  // VO 5 point algorithm
+  std::shared_ptr<VO::PoseEstmation> voPtr;
 };
 
 } // namespace Edrak

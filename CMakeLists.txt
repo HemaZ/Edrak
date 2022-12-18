@@ -18,6 +18,8 @@ else()
     add_compile_options()
 endif()
 
+add_compile_options( -Wno-deprecated-enum-enum-conversion)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
@@ -111,7 +113,6 @@ tests/3rdparty/ceresCurveFitting.cpp
 tests/3rdparty/g2oCurveFitting.cpp
 tests/3rdparty/opencvOrb.cpp
 tests/Images/Test_Features.cpp
-tests/VO/test_PoseEstmation.cpp
 tests/3D/Test_utils.cpp
 tests/3D/Test_ICP.cpp
 tests/3D/Test_Landmark.cpp

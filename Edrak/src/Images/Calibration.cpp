@@ -1,4 +1,6 @@
 #include "Edrak/Images/Calibration.hpp"
+#include <fstream>
+
 namespace Edrak {
 namespace Images {
 cv::Mat Undistort(const cv::Mat &src, const CameraMatD &A,
@@ -41,4 +43,38 @@ cv::Mat Undistort(const cv::Mat &src, const CameraMatD &A,
   return res;
 }
 } // namespace Images
+
+std::vector<CameraModel> ParseKITTICameras(
+    const std::string &calibPath) { // read camera intrinsics and extrinsics
+  std::ifstream fin(calibPath);
+  if (!fin) {
+    throw std::runtime_error("Cannot open calibration file in path " +
+                             calibPath);
+  }
+  std::vector<CameraModel> cameras;
+  for (int i = 0; i < 4; ++i) {
+    char camera_name[3];
+    for (int k = 0; k < 3; ++k) {
+      fin >> camera_name[k];
+    }
+    double projection_data[12];
+    for (int k = 0; k < 12; ++k) {
+      fin >> projection_data[k];
+    }
+    Eigen::Matrix3d K;
+    K << projection_data[0], projection_data[1], projection_data[2],
+        projection_data[4], projection_data[5], projection_data[6],
+        projection_data[8], projection_data[9], projection_data[10];
+    Eigen::Vector3d t;
+    t << projection_data[3], projection_data[7], projection_data[11];
+    t = K.inverse() * t;
+    K = K * 0.5;
+    CameraModel camera(K(0, 0), K(1, 1), K(0, 2), K(1, 2),
+                       Sophus::SE3d(Sophus::SO3d(), t));
+
+    cameras.push_back(camera);
+  }
+  fin.close();
+  return cameras;
+}
 } // namespace Edrak

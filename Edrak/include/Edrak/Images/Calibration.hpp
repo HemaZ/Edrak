@@ -77,6 +77,14 @@ struct StereoCamera {
   double baseLine;
 };
 
+/**
+ * @brief Load Cameras Calibration from KITTI calib.txt
+ *
+ * @param calibPath calib.txt file path
+ * @return std::vector<CameraModel> Cameras Calibration.
+ */
+std::vector<CameraModel> ParseKITTICameras(const std::string &calibPath);
+
 } // namespace Edrak
 
 #endif // __CALIBRATION_H__

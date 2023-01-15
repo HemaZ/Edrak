@@ -39,7 +39,7 @@ jobs:
       run: conan profile update settings.compiler.libcxx=libstdc++11 default
       
     - name: Install Pangloin
-      run: git clone --recursive https://github.com/stevenlovegrove/Pangolin.git && cd Pangolin  && ./scripts/install_prerequisites.sh recommended && cmake -B build && cmake --build build && sudo cmake --install build
+      run: git clone --recursive https://github.com/stevenlovegrove/Pangolin.git && cd Pangolin  && sudo apt update && ./scripts/install_prerequisites.sh recommended && cmake -B build && cmake --build build && sudo cmake --install build
       
     - name: Install G2o
       run: sudo apt update && sudo apt install -y libcxsparse3 libsuitesparse-dev && git clone https://github.com/RainerKuemmerle/g2o.git && cd g2o && cmake -B build && cmake --build build && sudo cmake --install build

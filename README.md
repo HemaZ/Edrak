@@ -1,4 +1,6 @@
 # Edrak
+![logo](docs/Logo.png)
+
 I have developed this library during reading the [slambook](https://github.com/gaoxiang12/slambook-en)
   by Xiang Gao, Tao Zhang, Qinrui Yan and Yi Liu.
 
@@ -15,3 +17,7 @@ $ conan install .. -s build_type=Debug --build missing
 $ cmake .. -DCMAKE_BUILD_TYPE=DEBUG
 $ make
 ```
+
+# Screenshots 
+KITTI Dataset 
+![KITTI-VO](media/kitti-vo.png)

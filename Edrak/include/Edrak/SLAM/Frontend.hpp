@@ -94,6 +94,11 @@ public:
     voPtr = std::make_shared<VO::PoseEstmation>(camera_.leftCamera.calibration);
   }
 
+  /**
+   * Get current cameera pose in world frame.
+   */
+  Sophus::SE3d GetTwc() const { return currentFrame_->Twc(); }
+
 private:
   /**
    * @brief Finds ORB features in left and tight image, Does ORB matching and

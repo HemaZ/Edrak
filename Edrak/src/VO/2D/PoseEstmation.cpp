@@ -1,13 +1,13 @@
 #include "Edrak/VO/2D/PoseEstmation.hpp"
 namespace Edrak {
 namespace VO {
-void PoseEstmation::Process(const cv::Mat &img) {
+int PoseEstmation::Process(const cv::Mat &img) {
   if (!initialized_) {
     lastFrame_ = img;
     Features::ORB(lastFrame_, lastFrameKps_, lastFrameDescriptors_);
     initialized_ = true;
-    return;
-  }
+    return 0;
+  } 
   // Extract ORB features for current frame.
   Features::KeyPoints::KeyPoints kps;
   cv::Mat descriptors;
@@ -26,7 +26,7 @@ void PoseEstmation::Process(const cv::Mat &img) {
   cv::Mat essentialMatrix = cv::findEssentialMat(prevPoints, currPoints, k_.fx,
                                                  cv::Point2f(k_.cx, k_.cy));
   cv::Mat R, t;
-  cv::recoverPose(essentialMatrix, prevPoints, currPoints, R, t, k_.fx,
+  nInliers = cv::recoverPose(essentialMatrix, prevPoints, currPoints, R, t, k_.fx,
                   cv::Point2f(k_.cx, k_.cy));
 
   Eigen::Matrix3d t_x;
@@ -43,7 +43,15 @@ void PoseEstmation::Process(const cv::Mat &img) {
   Eigen::Vector3d teigen;
   cv::cv2eigen(R, Reigen);
   cv::cv2eigen(t, teigen);
-  pose_ = Edrak::SE3D(Reigen, teigen);
+  pose_ = Edrak::SE3D(Reigen, teigen).inverse();
+  return nInliers;
+  
+  // Eigen::Matrix3d vistoSlam;
+  // vistoSlam << 0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 1.0, 0.0, 0.0;
+  // Eigen::Matrix3d slamToVis = vistoSlam.inverse();
+  // Sophus::SO3d r(slamToVis);
+  // pose_.so3() = r * pose_.so3() * r.inverse();
+  // pose_.translation() = r * pose_.translation();
 
   // Check Epipolar constraint.
   // for (size_t i = 0; i < prevPoints.size(); ++i) {

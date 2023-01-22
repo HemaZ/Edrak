@@ -19,8 +19,9 @@ private:
 
 public:
   PoseEstmation(const CameraMatD k) : k_(k) {}
-  void Process(const cv::Mat &img);
+  int Process(const cv::Mat &img);
   Edrak::SE3D Pose() const { return pose_; }
+  int nInliers;
 };
 
 } // namespace VO

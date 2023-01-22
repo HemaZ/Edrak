@@ -27,13 +27,13 @@ void Map::RemoveOldKeyframe() {
   double minDistance = 0.0;
   double maxDistance = std::numeric_limits<double>::max();
   uint32_t minKfId, maxKfId;
-  auto Twc = currentFrame->Pose().inverse();
+  auto Twc = currentFrame->Twc();
 
   for (const auto &kf : activeKeyframes) {
     if (kf.second == currentFrame) {
       continue;
     }
-    auto distance = (kf.second->Pose() * Twc).log().norm();
+    auto distance = (kf.second->Tcw() * Twc).log().norm();
     if (distance > maxDistance) {
       maxDistance = distance;
       maxKfId = kf.first;

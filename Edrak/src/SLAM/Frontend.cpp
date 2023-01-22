@@ -140,7 +140,7 @@ bool Frontend::BuildInitMap(
     bool triangSuccess = Images::Triangulation(poses, points, positionWorld);
     if (triangSuccess && positionWorld[2] > 0) {
       auto newLandmark = Edrak::Landmark::CreateLandmark();
-      newLandmark->Position(positionWorld);
+      newLandmark->Position(currentFrame_->Twc() * positionWorld);
       // Adding Observations to current landmark.
       newLandmark->AddObservation(currentFrame_->features[lKpIdx]);
       newLandmark->AddObservation(currentFrame_->featuresRight[rKpIdx]);
@@ -160,12 +160,13 @@ bool Frontend::BuildInitMap(
 
 bool Frontend::Track() {
   if (prevFrame_) {
-    Sophus::SE3d poseEstimRelativeMotion = relativeMotion_ * prevFrame_->Pose();
+    Sophus::SE3d poseEstimRelativeMotion = relativeMotion_ * prevFrame_->Tcw();
     const Sophus::SE3d poseEstim5PtsAlg = voPtr->Pose();
-    currentFrame_->Pose(poseEstim5PtsAlg);
+    auto Twc = prevFrame_->Twc() * poseEstim5PtsAlg;
+    currentFrame_->Twc(Twc);
   }
   int nTrackedPointsLastFrame = TrackLastFrame();
-  int nTrackedPoints = EstimateCurrentPoseCeres();
+  // int nTrackedPoints = EstimateCurrentPoseCeres();
 
   if (nTrackedPointsLastFrame > settings_.nFeaturesTracking) {
     state_ = FrontendState::TRACKING;
@@ -180,7 +181,7 @@ bool Frontend::Track() {
     InsertKeyframe();
     state_ = FrontendState::TRACKING;
   }
-  relativeMotion_ = currentFrame_->Pose() * prevFrame_->Pose().inverse();
+  relativeMotion_ = currentFrame_->Tcw() * prevFrame_->Tcw().inverse();
   if (viewer_) {
     viewer_->AddCurrentFrame(currentFrame_);
   }
@@ -220,7 +221,7 @@ int Frontend::TrackLastFrame() {
 
 int Frontend::EstimateCurrentPoseCeres() {
   ceres::Problem problem;
-  Sophus::SE3d pose = currentFrame_->Pose();
+  Sophus::SE3d pose = currentFrame_->Tcw();
   Eigen::Vector3d translation = pose.translation();
   Eigen::Quaternion<double> quat(pose.so3().params());
 
@@ -258,7 +259,7 @@ int Frontend::EstimateCurrentPoseCeres() {
   Eigen::Vector3d translationEst(T[4], T[5], T[6]);
 
   Sophus::SE3d new_pose(quatEst, translationEst);
-  currentFrame_->Pose(new_pose);
+  currentFrame_->Twc(new_pose);
   return currentFrame_->features.size();
 }
 
@@ -275,7 +276,7 @@ int Frontend::EstimateCurrentPose() {
   // Create current frame location as vertex
   Edrak::VertexPose *vertexPose = new Edrak::VertexPose();
   vertexPose->setId(0);
-  vertexPose->setEstimate(currentFrame_->Pose());
+  vertexPose->setEstimate(currentFrame_->Tcw());
   optimizer.addVertex(vertexPose);
 
   // Get Left Camera Intrinsics Matrix K
@@ -315,7 +316,7 @@ int Frontend::EstimateCurrentPose() {
   int nOutliers = 0;
   for (size_t iteration = 0; iteration < settings_.nIterationsPoseEstimation;
        iteration++) {
-    vertexPose->setEstimate(currentFrame_->Pose());
+    vertexPose->setEstimate(currentFrame_->Tcw());
     optimizer.initializeOptimization();
     optimizer.optimize(settings_.g2oOptimizerNIter);
     nOutliers = 0;
@@ -343,8 +344,8 @@ int Frontend::EstimateCurrentPose() {
   logger_->info("Outlier/Inlier in pose estimating: {}/{}", nOutliers,
                 features.size() - nOutliers);
   // Set pose and outliers
-  currentFrame_->Pose(vertexPose->estimate());
-  logger_->info("Current Pose = {}", currentFrame_->Pose().matrix());
+  currentFrame_->Tcw(vertexPose->estimate());
+  logger_->info("Current Pose = {}", currentFrame_->Tcw().matrix());
   for (auto &feat : features) {
     if (feat->isOutlier) {
       feat->landmark.reset();
@@ -391,7 +392,7 @@ void Frontend::SetObservationsForKeyFrame() {
 int Frontend::TriangulateNewPoints() {
   std::vector<Sophus::SE3d> poses{camera_.leftCamera.pose,
                                   camera_.rightCamera.pose};
-  Sophus::SE3d current_pose_Twc = currentFrame_->Pose().inverse();
+  Sophus::SE3d current_pose_Twc = currentFrame_->Twc();
   int cnt_triangulated_pts = 0;
   for (size_t i = 0; i < currentFrame_->features.size(); ++i) {
     if (currentFrame_->features[i]->landmark.expired() &&

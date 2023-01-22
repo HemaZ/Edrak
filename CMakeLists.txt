@@ -52,8 +52,8 @@ ${IMGGUI_PATH}/backends/imgui_impl_glfw.cpp
 ${IMGGUI_PATH}/backends/imgui_impl_opengl3.cpp
 )
 
-add_library(ImgGui ${IMGUI_SRCS})
-target_link_libraries(ImgGui ${CONAN_LIBS})
+# add_library(ImgGui ${IMGUI_SRCS})
+# target_link_libraries(ImgGui ${CONAN_LIBS})
 
 
 # Src files
@@ -88,8 +88,8 @@ target_link_libraries(Edrak ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ${G2O_SOLVE
 add_executable(EdrakMain Edrak/src/main.cpp)
 target_link_libraries(EdrakMain Edrak)
 
-add_executable(ImgGui_Test tests/Visual/Test_GUI.cpp)
-target_link_libraries(ImgGui_Test ImgGui Edrak)
+# add_executable(ImgGui_Test tests/Visual/Test_GUI.cpp)
+# target_link_libraries(ImgGui_Test ImgGui Edrak)
 
 # Build Examples
 set(EDRAK_BUILD_EXAMPLES ON CACHE BOOL "Build Edrak examples")

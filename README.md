@@ -20,4 +20,7 @@ $ make
 
 # Screenshots 
 KITTI Dataset 
-![KITTI-VO](media/kitti-vo.png)
+![KITTI-VO](media/Screenshot.png)
+
+
+![kittigif](media/KITTI_LOGO.gif)

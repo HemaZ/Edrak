@@ -46,7 +46,7 @@ public:
    *
    * @return Sophus::SE3d
    */
-  Sophus::SE3d Pose() {
+  Sophus::SE3d Tcw() {
     std::lock_guard<std::mutex> lock(poseMutex);
     return pose;
   }
@@ -55,9 +55,28 @@ public:
    *
    * @param newPose
    */
-  void Pose(const Sophus::SE3d &newPose) {
+  void Tcw(const Sophus::SE3d &newPose) {
     std::lock_guard<std::mutex> lock(poseMutex);
     pose = newPose;
+  }
+
+  /**
+   * @brief Tcw
+   *
+   * @return Sophus::SE3d
+   */
+  Sophus::SE3d Twc() {
+    std::lock_guard<std::mutex> lock(poseMutex);
+    return pose.inverse();
+  }
+  /**
+   * @brief
+   *
+   * @param newPose
+   */
+  void Twc(const Sophus::SE3d &newPose) {
+    std::lock_guard<std::mutex> lock(poseMutex);
+    pose = newPose.inverse();
   }
 
   /**

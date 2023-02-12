@@ -225,8 +225,9 @@ int Frontend::EstimateCurrentPoseCeres() {
   Eigen::Vector3d translation = pose.translation();
   Eigen::Quaternion<double> quat(pose.so3().params());
 
-  double T[] = {quat.w(),        quat.x(),        quat.y(),       quat.z(),
-                translation.x(), translation.y(), translation.z()};
+  double quatArray[] = {quat.w(), quat.x(), quat.y(), quat.z()};
+  double trans[] = {translation.x(), translation.y(), translation.z()};
+  ceres::Manifold *quaternion_manifold = new ceres::QuaternionManifold;
   for (size_t i = 0; i < currentFrame_->features.size(); i++) {
     // We get a shared_ptr of the weak ptr. Because the raw ptr could
     // have been destroyed from another thread.
@@ -242,7 +243,8 @@ int Frontend::EstimateCurrentPoseCeres() {
     // have been destroyed from another thread.
     ceres::CostFunction *cost_function = ReprojectionError::Create(
         x, y, camera_.leftCamera.calibration, position3D.data());
-    problem.AddResidualBlock(cost_function, nullptr, T);
+    problem.AddResidualBlock(cost_function, nullptr, quatArray, trans);
+    problem.SetManifold(quatArray, quaternion_manifold);
   }
   // Make Ceres automatically detect the bundle structure. Note that the
   // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
@@ -255,8 +257,9 @@ int Frontend::EstimateCurrentPoseCeres() {
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
 
-  Eigen::Quaternion<double> quatEst(T[0], T[1], T[2], T[3]);
-  Eigen::Vector3d translationEst(T[4], T[5], T[6]);
+  Eigen::Quaternion<double> quatEst(quatArray[0], quatArray[1], quatArray[2],
+                                    quatArray[3]);
+  Eigen::Vector3d translationEst(trans);
 
   Sophus::SE3d new_pose(quatEst, translationEst);
   currentFrame_->Twc(new_pose);

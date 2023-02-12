@@ -34,3 +34,4 @@
 build/*
 tests/2011_09*
 tests/2011_09_28_drive_0035*
+tests/data/KITTI/**

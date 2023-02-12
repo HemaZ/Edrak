@@ -45,15 +45,16 @@ struct ReprojectionError {
     point3d[2] = point3dArr[2];
   }
   template <typename T>
-  bool operator()(const T *const pose, T *residuals) const {
+  bool operator()(const T *const quat, const T *const tran,
+                  T *residuals) const {
     T p[3];
     T point[] = {T(point3d[0]), T(point3d[1]), T(point3d[2])};
     // Rotate the point using the angle axis pose[0],pose[1],pose[2]
-    ceres::QuaternionRotatePoint(pose, point, p);
+    ceres::QuaternionRotatePoint(quat, point, p);
     // Apply translation to the point
-    p[0] += pose[4];
-    p[1] += pose[5];
-    p[2] += pose[6];
+    p[0] += tran[0];
+    p[1] += tran[1];
+    p[2] += tran[2];
 
     p[0] /= p[2];
     p[1] /= p[2];
@@ -71,7 +72,7 @@ struct ReprojectionError {
                                      const double observed_y,
                                      const CameraMatD calibration,
                                      const double *point3dArr) {
-    return (new ceres::AutoDiffCostFunction<ReprojectionError, 2, 7>(
+    return (new ceres::AutoDiffCostFunction<ReprojectionError, 2, 4, 3>(
         new ReprojectionError(observed_x, observed_y, calibration,
                               point3dArr)));
   }

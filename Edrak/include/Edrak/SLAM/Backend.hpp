@@ -1,6 +1,7 @@
 #ifndef __EDRAK_SLAM_BACKEND_H__
 #define __EDRAK_SLAM_BACKEND_H__
 #include "Edrak/Common/Logger.hpp"
+#include "Edrak/Images/Calibration.hpp"
 #include "Edrak/Images/Features.hpp"
 #include "Edrak/Images/Frame.hpp"
 #include "Edrak/SLAM/Map.hpp"
@@ -31,6 +32,13 @@ public:
    */
   enum struct Solver { CERES, G2O };
 
+  /**
+   * @brief Set the stereo camera calibration.
+   * @param left Pinhole camera model represents the left camera.
+   * @param right Pinhole camera model represents the right camera.
+   */
+  void SetCamera(const StereoCamera &stereoCamera) { camera_ = stereoCamera; }
+
 private:
   /**
    * Run bundle adjusmtent on the map points and the keyframes.
@@ -40,16 +48,20 @@ private:
   /**
    * Run bundle adjustment using Ceres.
    */
-  void CeresBA(const KeyFramesData &keyframes, const LandmarksData &landmarks);
+  void CeresBA(const Map::KeyFramesData &keyframes,
+               const Map::LandmarksData &landmarks);
 
   /**
    * Run bundle adjeusmtent using G2O.
    */
-  void G2oBA(const KeyFramesData &keyframes, const LandmarksData &landmarks);
+  void G2oBA(const Map::KeyFramesData &keyframes,
+             const Map::LandmarksData &landmarks);
 
   Solver solver_ = Solver::CERES;
 
   Map::SharedPtr map_;
+
+  StereoCamera camera_;
 
   // Logger
   std::shared_ptr<spdlog::logger> logger_;

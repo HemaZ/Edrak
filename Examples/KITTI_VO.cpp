@@ -1,6 +1,5 @@
 #include "Edrak/IO/MonoReader.hpp"
-#include "Edrak/SLAM/Frontend.hpp"
-#include "Edrak/SLAM/Viewer.hpp"
+#include "Edrak/SLAM/VisualSLAM.hpp"
 #include "Edrak/Visual/3D.hpp"
 #include <memory>
 #include <unistd.h>
@@ -19,9 +18,6 @@ int main(int argc, char const *argv[]) {
 
   std::cout << " Processing " << imgs_path << " Frames\n";
   std::cout << " Processing " << N_FRAMES << " Frames\n";
-  Edrak::Frontend fe;
-  Edrak::Map::SharedPtr map = std::make_shared<Edrak::Map>();
-  fe.SetMap(map);
 
   // std::vector<Edrak::CameraModel> camerasCalib =
   // Edrak::ParseKITTICameras(imgs_path + "/calib.txt");
@@ -34,12 +30,8 @@ int main(int argc, char const *argv[]) {
 
   Edrak::StereoCamera cam{leftCamCalib, rightCamCalib,
                           rightCamCalib.pose.translation().norm()};
-  fe.SetCamera(cam);
 
-  // Create Viewer
-  Edrak::Viewer::SharedPtr viewer = std::make_shared<Edrak::Viewer>();
-  viewer->SetMap(map);
-  fe.SetViewer(viewer);
+  Edrak::VisualSLAM slam(cam);
 
   Edrak::IO::MonoReader leftReader{imgs_path + "/image_00/data/*.png",
                                    Edrak::IO::ImageType::GRAY, false};
@@ -53,18 +45,30 @@ int main(int argc, char const *argv[]) {
     leftReader.NextFrame(frame->imgData);
     rightReader.NextFrame(frame->rightImgData);
     if (frame->imgData.size() == frame->rightImgData.size()) {
-      fe.AddFrame(frame);
+      slam.AddFrame(frame);
+      auto state = slam.frontend->GetState();
+      switch (state) {
+      case Edrak::FrontendState::TRACKING:
+        std::cout << "Tracking \n";
+        break;
+      case Edrak::FrontendState::LOST:
+        std::cout << "LOST \n";
+        break;
+      case Edrak::FrontendState::INITIALIZING:
+        std::cout << "Initializing \n";
+        break;
+      }
     } else {
       break;
     }
     // std::cout << " Frame " << i << " Pose " << fe.GetTwc().matrix() << '\n';
-    trajectory.push_back(fe.GetTwc());
+    trajectory.push_back(slam.frontend->GetTwc());
     // std::cin >> wait ;
   }
 
   while (true) {
     usleep(5000);
-    viewer->UpdateMap();
+    slam.viewer->UpdateMap();
   }
   return 0;
 }

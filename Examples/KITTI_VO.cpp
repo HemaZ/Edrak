@@ -3,6 +3,7 @@
 #include "Edrak/SLAM/Viewer.hpp"
 #include "Edrak/Visual/3D.hpp"
 #include <memory>
+#include <unistd.h>
 int main(int argc, char const *argv[]) {
   std::string data_dir = EDRAK_TEST_DATA_DIR;
   std::string imgs_path = data_dir + "KITTI/";

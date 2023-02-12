@@ -4,7 +4,7 @@
 #include "Edrak/SLAM/Viewer.hpp"
 #include "Edrak/Images/Features.hpp"
 #include "Edrak/Images/Frame.hpp"
-
+#include <unistd.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 

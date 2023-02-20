@@ -166,7 +166,7 @@ bool Frontend::Track() {
     currentFrame_->Twc(Twc);
   }
   int nTrackedPointsLastFrame = TrackLastFrame();
-  // int nTrackedPoints = EstimateCurrentPoseCeres();
+  int nTrackedPoints = EstimateCurrentPoseCeres();
 
   if (nTrackedPointsLastFrame > settings_.nFeaturesTracking) {
     state_ = FrontendState::TRACKING;
@@ -243,7 +243,9 @@ int Frontend::EstimateCurrentPoseCeres() {
     // have been destroyed from another thread.
     ceres::CostFunction *cost_function = ReprojectionError::Create(
         x, y, camera_.leftCamera.calibration, position3D.data());
-    problem.AddResidualBlock(cost_function, nullptr, quatArray, trans);
+    // If enabled use Huber's loss function.
+    ceres::LossFunction *loss_function = new ceres::HuberLoss(1.0);
+    problem.AddResidualBlock(cost_function, loss_function, quatArray, trans);
     problem.SetManifold(quatArray, quaternion_manifold);
   }
   // Make Ceres automatically detect the bundle structure. Note that the
@@ -255,14 +257,14 @@ int Frontend::EstimateCurrentPoseCeres() {
 
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  std::cout << summary.FullReport() << "\n";
+  std::cout << summary.BriefReport() << "\n";
 
   Eigen::Quaternion<double> quatEst(quatArray[0], quatArray[1], quatArray[2],
                                     quatArray[3]);
   Eigen::Vector3d translationEst(trans);
 
-  Sophus::SE3d new_pose(quatEst, translationEst);
-  currentFrame_->Twc(new_pose);
+  Sophus::SE3d Tcw(quatEst, translationEst);
+  currentFrame_->Tcw(Tcw);
   return currentFrame_->features.size();
 }
 

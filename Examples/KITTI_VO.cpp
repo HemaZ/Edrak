@@ -1,4 +1,5 @@
 #include "Edrak/IO/MonoReader.hpp"
+#include "Edrak/IO/PointCloud.hpp"
 #include "Edrak/SLAM/VisualSLAM.hpp"
 #include "Edrak/Visual/3D.hpp"
 #include <memory>
@@ -65,7 +66,8 @@ int main(int argc, char const *argv[]) {
     trajectory.push_back(slam.frontend->GetTwc());
     // std::cin >> wait ;
   }
-
+  std::cout << "Writing PLY File \n";
+  Edrak::WritePLYFromLandmarks(slam.map->GetAllLandmarks(), imgs_path + "/out");
   while (true) {
     usleep(5000);
     slam.viewer->UpdateMap();

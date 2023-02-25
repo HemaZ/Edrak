@@ -14,7 +14,7 @@ int main(int argc, char const *argv[]) {
   if (argc > 2) {
     imgs_path += argv[2];
   } else {
-    imgs_path += "2011_09_26_drive_0093_sync";
+    imgs_path += "2011_09_26_drive_0064_sync";
   }
 
   std::cout << " Processing " << imgs_path << " Frames\n";
@@ -33,6 +33,11 @@ int main(int argc, char const *argv[]) {
                           rightCamCalib.pose.translation().norm()};
 
   Edrak::VisualSLAM slam(cam);
+
+  auto settings = Edrak::SLAM::LoadSettings(imgs_path + "/settings.yaml");
+  if (settings.has_value()) {
+    slam.frontend->SetSettings(*settings);
+  }
 
   Edrak::IO::MonoReader leftReader{imgs_path + "/image_00/data/*.png",
                                    Edrak::IO::ImageType::GRAY, false};
@@ -67,7 +72,8 @@ int main(int argc, char const *argv[]) {
     // std::cin >> wait ;
   }
   std::cout << "Writing PLY File \n";
-  Edrak::WritePLYFromLandmarks(slam.map->GetAllLandmarks(), imgs_path + "/out");
+  Edrak::WritePLYFromLandmarks(slam.map->GetActiveLandmarks(),
+                               imgs_path + "/out");
   while (true) {
     usleep(5000);
     slam.viewer->UpdateMap();

@@ -1,0 +1,5 @@
+Edrak:
+  SLAM:
+    Settings:
+      useCeresOptimization: false
+      g2oOptimizerNIter: 5

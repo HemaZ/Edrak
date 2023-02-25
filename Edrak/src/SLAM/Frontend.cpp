@@ -7,7 +7,7 @@ namespace Edrak {
 bool Frontend::AddFrame(StereoFrame::SharedPtr frame) {
   currentFrame_ = frame;
   bool ret = false;
-  if (voPtr) {
+  if (voPtr && settings_.use5PtsAlgorithm) {
     voPtr->Process(currentFrame_->imgData);
   }
   switch (state_) {
@@ -159,14 +159,20 @@ bool Frontend::BuildInitMap(
 }
 
 bool Frontend::Track() {
-  if (prevFrame_) {
-    Sophus::SE3d poseEstimRelativeMotion = relativeMotion_ * prevFrame_->Tcw();
+  if (prevFrame_ && settings_.use5PtsAlgorithm) {
+    // Use 5Pts Algorithm as an intial pose estimation.
     const Sophus::SE3d poseEstim5PtsAlg = voPtr->Pose();
     auto Twc = prevFrame_->Twc() * poseEstim5PtsAlg;
     currentFrame_->Twc(Twc);
+  } else {
+    // Use Relative motion as initial pose estimation.
+    Sophus::SE3d poseEstimRelativeMotion = relativeMotion_ * prevFrame_->Tcw();
+    currentFrame_->Tcw(poseEstimRelativeMotion);
   }
   int nTrackedPointsLastFrame = TrackLastFrame();
-  int nTrackedPoints = EstimateCurrentPoseCeres();
+  if (settings_.useCeresOptimization) {
+    int nTrackedPoints = EstimateCurrentPoseCeres();
+  }
 
   if (nTrackedPointsLastFrame > settings_.nFeaturesTracking) {
     state_ = FrontendState::TRACKING;
@@ -254,6 +260,7 @@ int Frontend::EstimateCurrentPoseCeres() {
   ceres::Solver::Options options;
   options.linear_solver_type = ceres::DENSE_SCHUR;
   options.minimizer_progress_to_stdout = true;
+  options.max_num_iterations = 100;
 
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);

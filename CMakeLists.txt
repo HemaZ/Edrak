@@ -75,6 +75,7 @@ Edrak/src/SLAM/Frontend.cpp
 Edrak/src/SLAM/Backend.cpp
 Edrak/src/SLAM/Viewer.cpp
 Edrak/src/IO/PointCloud.cpp
+Edrak/src/SLAM/Settings.cpp
 )
 
 add_library(Edrak ${EDRAK_SRC_FILES})

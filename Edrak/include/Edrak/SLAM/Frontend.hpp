@@ -6,6 +6,7 @@
 #include "Edrak/Images/Frame.hpp"
 #include "Edrak/Images/Triangulation.hpp"
 #include "Edrak/SLAM/Map.hpp"
+#include "Edrak/SLAM/Settings.hpp"
 #include "Edrak/SLAM/Viewer.hpp"
 #include "Edrak/VO/2D/PoseEstmation.hpp"
 #include <opencv2/features2d.hpp>
@@ -13,25 +14,6 @@ namespace Edrak {
 class Backend;
 class Viewer;
 using namespace Images::Features;
-
-struct FrontendSettings {
-  // Number of features to keep.
-  int nFeatures = 200;
-  // Number of features to finish init.
-  int nFeaturesToInit = 100;
-  // Number of features to assume good tracking.
-  int nFeaturesTracking = 50;
-  // Number of features to switch to bad tracking.
-  int nFeaturesBadTracking = 20;
-  // Number of features to add new keyframe.
-  int nFeaturesNewKeyframe = 80;
-  // Number of iteration for current frame pose estimation.
-  int nIterationsPoseEstimation = 4;
-  // Chi2 (Mahalanobis distance) Threshold to consider the feature is outlier.
-  double chi2Threshold = 5.991;
-  // Maximum number of iteration for g2o optimizer.
-  int g2oOptimizerNIter = 10;
-};
 
 /**
  * @brief Frontend tracking state.
@@ -42,7 +24,7 @@ class Frontend {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
   using SharedPtr = std::shared_ptr<Frontend>;
-  using Settings = FrontendSettings;
+  using Settings = SLAM::Settings;
   /**
    * @brief Construct a new Frontend for SLAM
    */
@@ -98,6 +80,13 @@ public:
    * Get current cameera pose in world frame.
    */
   Sophus::SE3d GetTwc() const { return currentFrame_->Twc(); }
+
+  /**
+   * @brief Set the Settings.
+   *
+   * @param settings New settings.
+   */
+  void SetSettings(const Settings &settings) { settings_ = settings; }
 
 private:
   /**

@@ -7,14 +7,14 @@ namespace Edrak {
 void WritePLYFromLandmarks(const Map::LandmarksData &landmarks,
                            const std::string filePath) {
   std::filebuf fb_binary;
-  fb_binary.open(filePath + "-binary.ply", std::ios::out | std::ios::binary);
+  fb_binary.open(filePath + "-asci.ply", std::ios::out);
   std::ostream outstream_binary(&fb_binary);
   if (outstream_binary.fail())
     throw std::runtime_error("failed to open " + filePath);
 
   tinyply::PlyFile plyOutputFile;
   std::vector<double> pts;
-  pts.reserve(landmarks.size());
+  pts.reserve(landmarks.size() * 3);
   for (const auto &landmark : landmarks) {
     auto pos = landmark.second->Position();
     pts.push_back(pos[0]);
@@ -22,9 +22,9 @@ void WritePLYFromLandmarks(const Map::LandmarksData &landmarks,
     pts.push_back(pos[2]);
   }
   plyOutputFile.add_properties_to_element(
-      "vertex", {"x", "y", "z"}, Type::FLOAT64, pts.size(),
+      "vertex", {"x", "y", "z"}, Type::FLOAT64, landmarks.size(),
       reinterpret_cast<uint8_t *>(pts.data()), Type::INVALID, 0);
   // Write a binary file
-  plyOutputFile.write(outstream_binary, true);
+  plyOutputFile.write(outstream_binary, false);
 }
 } // namespace Edrak

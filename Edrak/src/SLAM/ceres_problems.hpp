@@ -84,4 +84,45 @@ private:
   double point3d[3];
 };
 
+struct ReprojectionErrorBA {
+  ReprojectionErrorBA(double x_observed, double y_observed,
+                      CameraMatD calibration)
+      : xObserved(x_observed), yObserved(y_observed), calibration(calibration) {
+  }
+  template <typename T>
+  bool operator()(const T *const quat, const T *const tran,
+                  const T *const point3d, T *residuals) const {
+    T p[3];
+    // Rotate the point using the angle axis pose[0],pose[1],pose[2]
+    ceres::QuaternionRotatePoint(quat, point3d, p);
+    // Apply translation to the point
+    p[0] += tran[0];
+    p[1] += tran[1];
+    p[2] += tran[2];
+
+    p[0] /= p[2];
+    p[1] /= p[2];
+
+    T predicted_x = T(calibration.fx) * p[0] + T(calibration.cx);
+    T predicted_y = T(calibration.fy) * p[1] + T(calibration.cy);
+
+    // The error is the difference between the predicted and observed position.
+    residuals[0] = predicted_x - T(xObserved);
+    residuals[1] = predicted_y - T(yObserved);
+    return true;
+  }
+
+  static ceres::CostFunction *Create(const double observed_x,
+                                     const double observed_y,
+                                     const CameraMatD calibration) {
+    return (new ceres::AutoDiffCostFunction<ReprojectionErrorBA, 2, 4, 3, 3>(
+        new ReprojectionErrorBA(observed_x, observed_y, calibration)));
+  }
+
+private:
+  double xObserved;
+  double yObserved;
+  CameraMatD calibration;
+};
+
 #endif

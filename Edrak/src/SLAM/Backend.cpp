@@ -1,4 +1,5 @@
 #include "Edrak/SLAM/Backend.hpp"
+#include "ceres_problems.hpp"
 #include "g2o_types.h"
 namespace Edrak {
 
@@ -22,8 +23,57 @@ void Backend::RunBA() {
   }
 }
 
-void Backend::CeresBA(const Map::KeyFramesData &keyframes,
-                      const Map::LandmarksData &landmarks) {}
+void Backend::CeresBA(Map::KeyFramesData &keyframes,
+                      Map::LandmarksData &landmarks) {
+  ceres::Problem problem;
+  std::vector<std::vector<double>> kfsQuat;
+  std::vector<std::vector<double>> kfsTrans;
+  std::vector<std::shared_ptr<Landmark>> landmarksPtrs;
+  std::vector<std::vector<double>> landmarksPts;
+
+  for (auto &kf : keyframes) {
+    uint32_t keyFrameId = kf.first;
+    Edrak::StereoFrame::SharedPtr frame = kf.second;
+    Sophus::SE3d pose = frame->Tcw();
+    Eigen::Vector3d translation = pose.translation();
+    Eigen::Quaternion<double> quat(pose.so3().params());
+    std::vector<double> quaterion = {quat.w(), quat.x(), quat.y(), quat.z()};
+    std::vector<double> trans = {translation.x(), translation.y(),
+                                 translation.z()};
+    kfsQuat.push_back(quaterion);
+    kfsTrans.push_back(trans);
+    for (auto &feature : frame->features) {
+      if (feature->isOutlier) {
+        continue;
+      }
+      Edrak::Landmark::SharedPtr landmarkPtr = feature->landmark.lock();
+      if (landmarkPtr == nullptr) {
+        continue;
+      }
+      landmarksPtrs.push_back(landmarkPtr);
+      auto landmarkPosition = landmarkPtr->Position();
+      landmarksPts.push_back(
+          {landmarkPosition.x(), landmarkPosition.y(), landmarkPosition.z()});
+      ceres::CostFunction *cost_function;
+      cost_function = ReprojectionErrorBA::Create(
+          feature->position.pt.x, feature->position.pt.y,
+          camera_.leftCamera.calibration);
+      // If enabled use Huber's loss function.
+      ceres::LossFunction *loss_function = new ceres::HuberLoss(1.0);
+      problem.AddResidualBlock(cost_function, loss_function,
+                               kfsQuat.back().data(), kfsTrans.back().data(),
+                               landmarksPts.back().data());
+    }
+  }
+  ceres::Solver::Options options;
+  options.linear_solver_type = ceres::LinearSolverType::SPARSE_SCHUR;
+  options.minimizer_progress_to_stdout = true;
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, &problem, &summary);
+  std::cout << summary.FullReport() << "\n";
+  /// TODO Set the optimized Kfs poses and landmarks positions
+  /// to the map keyframes and landmarks
+}
 
 void Backend::G2oBA(const Map::KeyFramesData &keyframes,
                     const Map::LandmarksData &landmarks) {

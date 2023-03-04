@@ -48,8 +48,7 @@ private:
   /**
    * Run bundle adjustment using Ceres.
    */
-  void CeresBA(const Map::KeyFramesData &keyframes,
-               const Map::LandmarksData &landmarks);
+  void CeresBA(Map::KeyFramesData &keyframes, Map::LandmarksData &landmarks);
 
   /**
    * Run bundle adjeusmtent using G2O.

@@ -24,8 +24,8 @@ void Map::RemoveOldKeyframe() {
     return;
   }
 
-  double minDistance = 0.0;
-  double maxDistance = std::numeric_limits<double>::max();
+  double minDistance = std::numeric_limits<double>::max();
+  double maxDistance = 0.0;
   uint32_t minKfId, maxKfId;
   auto Twc = currentFrame->Twc();
 
@@ -46,9 +46,9 @@ void Map::RemoveOldKeyframe() {
 
   StereoFrame::SharedPtr frameToRemove = nullptr;
   if (minDistance < minDistanceFrame) {
-    frameToRemove = activeKeyframes[minKfId];
+    frameToRemove = activeKeyframes.at(minKfId);
   } else {
-    frameToRemove = activeKeyframes[maxKfId];
+    frameToRemove = activeKeyframes.at(maxKfId);
   }
 
   // Remove the frame
@@ -57,6 +57,7 @@ void Map::RemoveOldKeyframe() {
   for (auto feat : frameToRemove->features) {
     auto landmark = feat->landmark.lock();
     if (landmark) {
+
       landmark->RemoveObservation(feat);
     }
   }

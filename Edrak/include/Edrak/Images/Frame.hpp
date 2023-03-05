@@ -85,6 +85,8 @@ public:
    * @return std::shared_ptr<Frame>
    */
   static std::shared_ptr<Frame> CreateFrame();
+
+  void SetKeyFrame();
 };
 
 struct StereoFrame : public Frame {

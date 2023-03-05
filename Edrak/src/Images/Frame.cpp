@@ -13,6 +13,13 @@ std::shared_ptr<Frame> Frame::CreateFrame() {
   return ptr;
 }
 
+void Frame::SetKeyFrame() {
+  static uint32_t newKFId = 0;
+  this->isKeyFrame = true;
+  this->keyFrameId = newKFId;
+  ++newKFId;
+}
+
 std::shared_ptr<StereoFrame> StereoFrame::CreateFrame() {
   static uint32_t newFrameId = 0;
   std::shared_ptr<StereoFrame> ptr = std::make_shared<StereoFrame>();

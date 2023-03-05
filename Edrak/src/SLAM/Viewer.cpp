@@ -4,9 +4,9 @@
 #include "Edrak/SLAM/Viewer.hpp"
 #include "Edrak/Images/Features.hpp"
 #include "Edrak/Images/Frame.hpp"
-#include <unistd.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
+#include <unistd.h>
 
 #include <pangolin/pangolin.h>
 
@@ -78,6 +78,12 @@ void Viewer::ThreadLoop() {
     if (!trajectory_.empty()) {
       for (const auto &pose : trajectory_) {
         DrawFrame(pose, green);
+      }
+    }
+
+    if (!kfstrajectory_.empty()) {
+      for (const auto &pose : kfstrajectory_) {
+        DrawFrame(pose, blue);
       }
     }
 
@@ -155,9 +161,10 @@ void Viewer::DrawFrame(const Sophus::SE3d &Twc, const float *color) {
 }
 
 void Viewer::DrawMapPoints() {
-  const float red[3] = {1.0, 0, 0};
+  const float blue[3] = {0.0, 0, 1.0};
+  const float red[3] = {1.0, 0, 0.0};
   for (auto &kf : active_keyframes_) {
-    DrawFrame(kf.second->Twc(), red);
+    DrawFrame(kf.second->Twc(), blue);
   }
 
   glPointSize(2);
@@ -174,36 +181,9 @@ void Viewer::AddCurrentTrajectory(const Edrak::TrajectoryD &traj) {
   trajectory_ = traj;
 }
 
-void Viewer::DrawTrajectory() {
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-  glLineWidth(2);
-  for (size_t i = 0; i < trajectory_.size(); i++) {
-
-    Eigen::Vector3d Ow = trajectory_[i].translation();
-    Eigen::Vector3d Xw = trajectory_[i] * (0.1 * Eigen::Vector3d(1, 0, 0));
-    Eigen::Vector3d Yw = trajectory_[i] * (0.1 * Eigen::Vector3d(0, 1, 0));
-    Eigen::Vector3d Zw = trajectory_[i] * (0.1 * Eigen::Vector3d(0, 0, 1));
-    glBegin(GL_LINES);
-    glColor3f(1.0, 0.0, 0.0);
-    glVertex3d(Ow[0], Ow[1], Ow[2]);
-    glVertex3d(Xw[0], Xw[1], Xw[2]);
-    glColor3f(0.0, 1.0, 0.0);
-    glVertex3d(Ow[0], Ow[1], Ow[2]);
-    glVertex3d(Yw[0], Yw[1], Yw[2]);
-    glColor3f(0.0, 0.0, 1.0);
-    glVertex3d(Ow[0], Ow[1], Ow[2]);
-    glVertex3d(Zw[0], Zw[1], Zw[2]);
-    glEnd();
-  }
-  for (size_t i = 0; i < trajectory_.size(); i++) {
-    glColor3f(0.0, 0.0, 0.0);
-    glBegin(GL_LINES);
-    auto p1 = trajectory_[i], p2 = trajectory_[i + 1];
-    glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);
-    glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);
-    glEnd();
-  }
-  trajectory_.clear();
+void Viewer::AddCurrentKFsTrajectory(const Edrak::TrajectoryD &traj) {
+  std::unique_lock<std::mutex> lck(viewer_data_mutex_);
+  kfstrajectory_ = traj;
 }
 
 } // namespace Edrak

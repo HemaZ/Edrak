@@ -33,6 +33,8 @@ public:
 
   void AddCurrentTrajectory(const Edrak::TrajectoryD &traj);
 
+  void AddCurrentKFsTrajectory(const Edrak::TrajectoryD &traj);
+
   // 更新地图
   void UpdateMap();
 
@@ -48,8 +50,6 @@ private:
   /// plot the features in current frame into an image
   cv::Mat PlotFrameImage();
 
-  void DrawTrajectory();
-
   Edrak::StereoFrame::SharedPtr current_frame_ = nullptr;
   Map::SharedPtr map_ = nullptr;
 
@@ -59,6 +59,7 @@ private:
   std::unordered_map<uint32_t, Edrak::StereoFrame::SharedPtr> active_keyframes_;
   std::unordered_map<uint32_t, Edrak::Landmark::SharedPtr> active_landmarks_;
   Edrak::TrajectoryD trajectory_;
+  Edrak::TrajectoryD kfstrajectory_;
   bool map_updated_ = false;
 
   std::mutex viewer_data_mutex_;

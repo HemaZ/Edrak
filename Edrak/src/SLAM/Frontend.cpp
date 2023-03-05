@@ -153,7 +153,7 @@ bool Frontend::BuildInitMap(
   }
   currentFrame_->isKeyFrame = true;
   map_->InsertKeyframe(currentFrame_);
-  backend_->UpdateMap();
+  // backend_->UpdateMap();
   logger_->info("Initial map created with {} landmarks.", nLandmarks);
   return true;
 }
@@ -371,7 +371,7 @@ bool Frontend::InsertKeyframe() {
   // note. This function need to be revisited.
   // DetectFeatures and TriangulateNewPoints
   logger_->info("Setting Frame {} as a keyframe", currentFrame_->frameId);
-  currentFrame_->isKeyFrame = true;
+  currentFrame_->SetKeyFrame();
   map_->InsertKeyframe(currentFrame_);
   SetObservationsForKeyFrame();
   // Finding new features
@@ -383,7 +383,7 @@ bool Frontend::InsertKeyframe() {
   // TriangulateNewPoints();
 
   // Update Backend
-  backend_->UpdateMap();
+  // backend_->UpdateMap();
 
   // Update viewer with new keyframe
   if (viewer_)

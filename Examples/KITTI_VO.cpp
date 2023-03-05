@@ -1,5 +1,6 @@
 #include "Edrak/IO/MonoReader.hpp"
 #include "Edrak/IO/PointCloud.hpp"
+#include "Edrak/IO/Trajectory.hpp"
 #include "Edrak/SLAM/VisualSLAM.hpp"
 #include "Edrak/Visual/3D.hpp"
 #include <memory>
@@ -39,9 +40,9 @@ int main(int argc, char const *argv[]) {
     slam.frontend->SetSettings(*settings);
   }
 
-  Edrak::IO::MonoReader leftReader{imgs_path + "/image_00/data/*.png",
+  Edrak::IO::MonoReader leftReader{imgs_path + "/image_0/*.png",
                                    Edrak::IO::ImageType::GRAY, false};
-  Edrak::IO::MonoReader rightReader{imgs_path + "/image_01/data/*.png",
+  Edrak::IO::MonoReader rightReader{imgs_path + "/image_1/*.png",
                                     Edrak::IO::ImageType::GRAY, false};
   std::string wait;
   Edrak::TrajectoryD trajectory;
@@ -71,9 +72,31 @@ int main(int argc, char const *argv[]) {
     trajectory.push_back(slam.frontend->GetTwc());
     // std::cin >> wait ;
   }
+
+  Edrak::TrajectoryD KeyframesTrajbeforeBa;
+  auto activeKfs = slam.map->GetAllKeyframes();
+  for (const auto &kfPose : activeKfs) {
+    KeyframesTrajbeforeBa.push_back(kfPose.second->Twc());
+  }
+  std::cout << "Writing KeyFrames Trajecotries File \n";
+  Edrak::IO::ExportTrajectory(imgs_path + "/kfs_trajectory_before_ba.txt",
+                              KeyframesTrajbeforeBa);
+  std::cout << "Running BA \n";
+  // slam.backend->OptimizeMap();
   std::cout << "Writing PLY File \n";
-  Edrak::WritePLYFromLandmarks(slam.map->GetActiveLandmarks(),
-                               imgs_path + "/out");
+  Edrak::WritePLYFromLandmarks(slam.map->GetAllLandmarks(),
+                               imgs_path + "/out.ply");
+  Edrak::IO::ExportTrajectory(imgs_path + "/trajectory.txt", trajectory);
+
+  Edrak::TrajectoryD KeyframesTraj;
+  for (const auto &kfPose : slam.map->GetAllKeyframes()) {
+    KeyframesTraj.push_back(kfPose.second->Twc());
+  }
+  slam.viewer->AddCurrentKFsTrajectory(KeyframesTraj);
+  std::cout << "Writing KeyFrames Trajecotries File \n";
+  Edrak::IO::ExportTrajectory(imgs_path + "/kfs_trajectory_after_ba.txt",
+                              KeyframesTraj);
+
   while (true) {
     usleep(5000);
     slam.viewer->UpdateMap();

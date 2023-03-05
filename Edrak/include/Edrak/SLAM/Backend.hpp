@@ -28,6 +28,12 @@ public:
   void UpdateMap();
 
   /**
+   * @brief Run Global BA on the whole map.
+   *
+   */
+  void OptimizeMap();
+
+  /**
    * The non-liner optimzation solver to use.
    */
   enum struct Solver { CERES, G2O };
@@ -41,14 +47,20 @@ public:
 
 private:
   /**
+   * Run bundle adjusmtent on the active keyframes and landmarks.
+   */
+  void RunLocalBA();
+
+  /**
    * Run bundle adjusmtent on the map points and the keyframes.
    */
-  void RunBA();
+  void RunGlobalBA();
 
   /**
    * Run bundle adjustment using Ceres.
    */
-  void CeresBA(Map::KeyFramesData &keyframes, Map::LandmarksData &landmarks);
+  void CeresBA(Map::KeyFramesData &keyframes, Map::LandmarksData &landmarks)
+      __attribute__((optimize(0)));
 
   /**
    * Run bundle adjeusmtent using G2O.

@@ -8,11 +8,37 @@ void Backend::UpdateMap() {
     logger_->info("Update map is called without setting the map");
     throw std::runtime_error("Map is not set. Can't update non existing map.");
   }
+  RunLocalBA();
 }
 
-void Backend::RunBA() {
+void Backend::OptimizeMap() {
+  if (map_ == nullptr) {
+    logger_->info("Update map is called without setting the map");
+    throw std::runtime_error("Map is not set. Can't update non existing map.");
+  }
+  RunGlobalBA();
+}
+
+void Backend::RunLocalBA() {
   auto kefyframes = map_->GetActiveKeyframes();
   auto landmarks = map_->GetActiveLandmarks();
+  logger_->info("Running BA on {} Keyframe and {} map point", kefyframes.size(),
+                landmarks.size());
+  switch (solver_) {
+  case Solver::CERES:
+    CeresBA(kefyframes, landmarks);
+    break;
+  case Solver::G2O:
+    G2oBA(kefyframes, landmarks);
+    break;
+  }
+}
+
+void Backend::RunGlobalBA() {
+  auto kefyframes = map_->GetAllKeyframes();
+  auto landmarks = map_->GetAllLandmarks();
+  logger_->info("Running BA on {} Keyframe and {} map point", kefyframes.size(),
+                landmarks.size());
   switch (solver_) {
   case Solver::CERES:
     CeresBA(kefyframes, landmarks);
@@ -29,7 +55,8 @@ void Backend::CeresBA(Map::KeyFramesData &keyframes,
   std::vector<std::vector<double>> kfsQuat;
   std::vector<std::vector<double>> kfsTrans;
   std::vector<std::shared_ptr<Landmark>> landmarksPtrs;
-  std::vector<std::vector<double>> landmarksPts;
+  // std::vector<std::vector<double>> landmarksPts;;
+  std::unordered_map<uint32_t, std::vector<double>> landmarksPts;
 
   for (auto &kf : keyframes) {
     uint32_t keyFrameId = kf.first;
@@ -52,8 +79,10 @@ void Backend::CeresBA(Map::KeyFramesData &keyframes,
       }
       landmarksPtrs.push_back(landmarkPtr);
       auto landmarkPosition = landmarkPtr->Position();
-      landmarksPts.push_back(
-          {landmarkPosition.x(), landmarkPosition.y(), landmarkPosition.z()});
+      if (landmarksPts.count(landmarkPtr->id) == 0) {
+        landmarksPts[landmarkPtr->id] = {
+            landmarkPosition.x(), landmarkPosition.y(), landmarkPosition.z()};
+      }
       ceres::CostFunction *cost_function;
       cost_function = ReprojectionErrorBA::Create(
           feature->position.pt.x, feature->position.pt.y,
@@ -62,7 +91,9 @@ void Backend::CeresBA(Map::KeyFramesData &keyframes,
       ceres::LossFunction *loss_function = new ceres::HuberLoss(1.0);
       problem.AddResidualBlock(cost_function, loss_function,
                                kfsQuat.back().data(), kfsTrans.back().data(),
-                               landmarksPts.back().data());
+                               landmarksPts[landmarkPtr->id].data());
+      ceres::Manifold *quaternion_manifold = new ceres::QuaternionManifold;
+      problem.SetManifold(kfsQuat.back().data(), quaternion_manifold);
     }
   }
   ceres::Solver::Options options;
@@ -73,6 +104,23 @@ void Backend::CeresBA(Map::KeyFramesData &keyframes,
   std::cout << summary.FullReport() << "\n";
   /// TODO Set the optimized Kfs poses and landmarks positions
   /// to the map keyframes and landmarks
+  size_t kfIdX = 0;
+  for (auto &kf : keyframes) {
+    auto translationEst = kfsTrans[kfIdX];
+    auto quatEst = kfsQuat[kfIdX];
+    Eigen::Vector3d translation(translationEst.data());
+    Eigen::Quaternion<double> quatEstEigen(quatEst.data());
+    Sophus::SE3d Tcw(quatEstEigen, translation);
+    kf.second->Tcw(Tcw);
+    ++kfIdX;
+  }
+  for (size_t landmarkIdx = 0; landmarkIdx < landmarksPtrs.size();
+       landmarkIdx++) {
+    auto landmark = landmarksPtrs[landmarkIdx];
+    auto landmarkPt = landmarksPts[landmark->id];
+    Eigen::Vector3d position(landmarkPt.data());
+    landmark->Position(position);
+  }
 }
 
 void Backend::G2oBA(const Map::KeyFramesData &keyframes,
@@ -137,7 +185,8 @@ void Backend::G2oBA(const Map::KeyFramesData &keyframes,
   //     }
 
   //     // 如果landmark还没有被加入优化，则新加一个顶点
-  //     if (vertices_landmarks.find(landmark_id) == vertices_landmarks.end()) {
+  //     if (vertices_landmarks.find(landmark_id) == vertices_landmarks.end())
+  //     {
   //       VertexXYZ *v = new VertexXYZ;
   //       v->setEstimate(landmark.second->Position());
   //       v->setId(landmark_id + max_kf_id + 1);

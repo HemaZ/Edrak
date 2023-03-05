@@ -3,8 +3,16 @@
 #include "Edrak/SLAM/Map.hpp"
 #include <fstream>
 namespace Edrak {
-void WritePLYFromLandmarks(const Map::LandmarksData &landmarks,
+/**
+ * @brief Export Map landmarks as PLY file.
+ *
+ * @param landmarks
+ * @param filePath
+ * @return true
+ * @return false
+ */
+bool WritePLYFromLandmarks(const Map::LandmarksData &landmarks,
                            const std::string filePath);
 
-}
+} // namespace Edrak
 #endif // __EDRAK_IO_POINTCLOUD_H__

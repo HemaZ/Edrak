@@ -4,27 +4,33 @@
 using namespace tinyply;
 
 namespace Edrak {
-void WritePLYFromLandmarks(const Map::LandmarksData &landmarks,
+bool WritePLYFromLandmarks(const Map::LandmarksData &landmarks,
                            const std::string filePath) {
-  std::filebuf fb_binary;
-  fb_binary.open(filePath + "-asci.ply", std::ios::out);
-  std::ostream outstream_binary(&fb_binary);
-  if (outstream_binary.fail())
-    throw std::runtime_error("failed to open " + filePath);
 
-  tinyply::PlyFile plyOutputFile;
-  std::vector<double> pts;
-  pts.reserve(landmarks.size() * 3);
+  std::ofstream of(filePath.c_str());
+  if (of.fail()) {
+    return false;
+  }
+  of << "ply" << '\n'
+     << "format ascii 1.0" << '\n'
+     << "element vertex " << landmarks.size() << '\n'
+     << "property float x" << '\n'
+     << "property float y" << '\n'
+     << "property float z" << '\n'
+     << "property uchar red" << '\n'
+     << "property uchar green" << '\n'
+     << "property uchar blue" << '\n'
+     << "end_header" << std::endl;
+  // Export the structure (i.e. 3D Points) as white points.
+
   for (const auto &landmark : landmarks) {
     auto pos = landmark.second->Position();
-    pts.push_back(pos[0]);
-    pts.push_back(pos[1]);
-    pts.push_back(pos[2]);
+    of << pos.x() << ' ';
+    of << pos.y() << ' ';
+    of << pos.z() << ' ';
+    of << " 255 255 255\n";
   }
-  plyOutputFile.add_properties_to_element(
-      "vertex", {"x", "y", "z"}, Type::FLOAT64, landmarks.size(),
-      reinterpret_cast<uint8_t *>(pts.data()), Type::INVALID, 0);
-  // Write a binary file
-  plyOutputFile.write(outstream_binary, false);
+  of.close();
+  return true;
 }
 } // namespace Edrak

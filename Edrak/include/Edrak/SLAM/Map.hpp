@@ -86,7 +86,7 @@ private:
   StereoFrame::SharedPtr currentFrame;
   uint32_t nActiveKeyframes = 7;
   double minDistanceFrame = 0.2;
-  void RemoveOldKeyframe();
+  void RemoveOldKeyframe() __attribute__((optimize(0)));
 };
 
 } // namespace Edrak

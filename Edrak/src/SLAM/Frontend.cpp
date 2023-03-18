@@ -7,7 +7,7 @@ namespace Edrak {
 bool Frontend::AddFrame(StereoFrame::SharedPtr frame) {
   currentFrame_ = frame;
   bool ret = false;
-  if (voPtr) {
+  if (voPtr && settings_.use5PtsAlgorithm) {
     voPtr->Process(currentFrame_->imgData);
   }
   switch (state_) {
@@ -153,20 +153,26 @@ bool Frontend::BuildInitMap(
   }
   currentFrame_->isKeyFrame = true;
   map_->InsertKeyframe(currentFrame_);
-  backend_->UpdateMap();
+  // backend_->UpdateMap();
   logger_->info("Initial map created with {} landmarks.", nLandmarks);
   return true;
 }
 
 bool Frontend::Track() {
-  if (prevFrame_) {
-    Sophus::SE3d poseEstimRelativeMotion = relativeMotion_ * prevFrame_->Tcw();
+  if (prevFrame_ && settings_.use5PtsAlgorithm) {
+    // Use 5Pts Algorithm as an intial pose estimation.
     const Sophus::SE3d poseEstim5PtsAlg = voPtr->Pose();
     auto Twc = prevFrame_->Twc() * poseEstim5PtsAlg;
     currentFrame_->Twc(Twc);
+  } else {
+    // Use Relative motion as initial pose estimation.
+    Sophus::SE3d poseEstimRelativeMotion = relativeMotion_ * prevFrame_->Tcw();
+    currentFrame_->Tcw(poseEstimRelativeMotion);
   }
   int nTrackedPointsLastFrame = TrackLastFrame();
-  // int nTrackedPoints = EstimateCurrentPoseCeres();
+  if (settings_.useCeresOptimization) {
+    int nTrackedPoints = EstimateCurrentPoseCeres();
+  }
 
   if (nTrackedPointsLastFrame > settings_.nFeaturesTracking) {
     state_ = FrontendState::TRACKING;
@@ -225,8 +231,9 @@ int Frontend::EstimateCurrentPoseCeres() {
   Eigen::Vector3d translation = pose.translation();
   Eigen::Quaternion<double> quat(pose.so3().params());
 
-  double T[] = {quat.w(),        quat.x(),        quat.y(),       quat.z(),
-                translation.x(), translation.y(), translation.z()};
+  double quatArray[] = {quat.w(), quat.x(), quat.y(), quat.z()};
+  double trans[] = {translation.x(), translation.y(), translation.z()};
+  ceres::Manifold *quaternion_manifold = new ceres::QuaternionManifold;
   for (size_t i = 0; i < currentFrame_->features.size(); i++) {
     // We get a shared_ptr of the weak ptr. Because the raw ptr could
     // have been destroyed from another thread.
@@ -242,7 +249,10 @@ int Frontend::EstimateCurrentPoseCeres() {
     // have been destroyed from another thread.
     ceres::CostFunction *cost_function = ReprojectionError::Create(
         x, y, camera_.leftCamera.calibration, position3D.data());
-    problem.AddResidualBlock(cost_function, nullptr, T);
+    // If enabled use Huber's loss function.
+    ceres::LossFunction *loss_function = new ceres::HuberLoss(1.0);
+    problem.AddResidualBlock(cost_function, loss_function, quatArray, trans);
+    problem.SetManifold(quatArray, quaternion_manifold);
   }
   // Make Ceres automatically detect the bundle structure. Note that the
   // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
@@ -250,16 +260,18 @@ int Frontend::EstimateCurrentPoseCeres() {
   ceres::Solver::Options options;
   options.linear_solver_type = ceres::DENSE_SCHUR;
   options.minimizer_progress_to_stdout = true;
+  options.max_num_iterations = 100;
 
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  std::cout << summary.FullReport() << "\n";
+  std::cout << summary.BriefReport() << "\n";
 
-  Eigen::Quaternion<double> quatEst(T[0], T[1], T[2], T[3]);
-  Eigen::Vector3d translationEst(T[4], T[5], T[6]);
+  Eigen::Quaternion<double> quatEst(quatArray[0], quatArray[1], quatArray[2],
+                                    quatArray[3]);
+  Eigen::Vector3d translationEst(trans);
 
-  Sophus::SE3d new_pose(quatEst, translationEst);
-  currentFrame_->Twc(new_pose);
+  Sophus::SE3d Tcw(quatEst, translationEst);
+  currentFrame_->Tcw(Tcw);
   return currentFrame_->features.size();
 }
 
@@ -359,7 +371,7 @@ bool Frontend::InsertKeyframe() {
   // note. This function need to be revisited.
   // DetectFeatures and TriangulateNewPoints
   logger_->info("Setting Frame {} as a keyframe", currentFrame_->frameId);
-  currentFrame_->isKeyFrame = true;
+  currentFrame_->SetKeyFrame();
   map_->InsertKeyframe(currentFrame_);
   SetObservationsForKeyFrame();
   // Finding new features
@@ -371,7 +383,7 @@ bool Frontend::InsertKeyframe() {
   // TriangulateNewPoints();
 
   // Update Backend
-  backend_->UpdateMap();
+  // backend_->UpdateMap();
 
   // Update viewer with new keyframe
   if (viewer_)

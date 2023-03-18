@@ -8,10 +8,16 @@
 int main(int argc, char const *argv[]) {
   std::string data_dir = EDRAK_TEST_DATA_DIR;
   std::string imgs_path = data_dir + "KITTI/";
+
   if (argc > 1) {
-    imgs_path += argv[1];
+    if (argv[1][0] != '/') {
+      imgs_path += argv[1];
+    } else {
+      imgs_path = argv[1];
+    }
   } else {
-    imgs_path += "2011_09_26_drive_0064_sync";
+    std::cerr << "No KITTI sequence is provied. Exiting !";
+    return -1;
   }
 
   std::cout << " Processing " << imgs_path << " Frames\n";
@@ -80,7 +86,7 @@ int main(int argc, char const *argv[]) {
   for (const auto &kfPose : activeKfs) {
     KeyframesTrajbeforeBa.push_back(kfPose.second->Twc());
   }
-  std::cout << "Writing KeyFrames Trajecotries File \n";
+  std::cout << "Writing KeyFrames Trajectories File \n";
   Edrak::IO::ExportTrajectory(imgs_path + "/kfs_trajectory_before_ba.txt",
                               KeyframesTrajbeforeBa);
   std::cout << "Running BA \n";
@@ -95,7 +101,7 @@ int main(int argc, char const *argv[]) {
     KeyframesTraj.push_back(kfPose.second->Twc());
   }
   slam.viewer->AddCurrentKFsTrajectory(KeyframesTraj);
-  std::cout << "Writing KeyFrames Trajecotries File \n";
+  std::cout << "Writing KeyFrames Trajectories File \n";
   Edrak::IO::ExportTrajectory(imgs_path + "/kfs_trajectory_after_ba.txt",
                               KeyframesTraj);
 

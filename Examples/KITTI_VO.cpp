@@ -8,18 +8,13 @@
 int main(int argc, char const *argv[]) {
   std::string data_dir = EDRAK_TEST_DATA_DIR;
   std::string imgs_path = data_dir + "KITTI/";
-  int N_FRAMES = 100;
   if (argc > 1) {
-    N_FRAMES = std::stoi(argv[1]);
-  }
-  if (argc > 2) {
-    imgs_path += argv[2];
+    imgs_path += argv[1];
   } else {
     imgs_path += "2011_09_26_drive_0064_sync";
   }
 
   std::cout << " Processing " << imgs_path << " Frames\n";
-  std::cout << " Processing " << N_FRAMES << " Frames\n";
 
   // std::vector<Edrak::CameraModel> camerasCalib =
   // Edrak::ParseKITTICameras(imgs_path + "/calib.txt");
@@ -47,27 +42,34 @@ int main(int argc, char const *argv[]) {
   std::string wait;
   Edrak::TrajectoryD trajectory;
 
-  for (size_t i = 0; i < N_FRAMES; i++) {
+  while (true) {
+    // Create a stereo frame
     Edrak::StereoFrame::SharedPtr frame = Edrak::StereoFrame::CreateFrame();
-    leftReader.NextFrame(frame->imgData);
-    rightReader.NextFrame(frame->rightImgData);
-    if (frame->imgData.size() == frame->rightImgData.size()) {
-      slam.AddFrame(frame);
-      auto state = slam.frontend->GetState();
-      switch (state) {
-      case Edrak::FrontendState::TRACKING:
-        std::cout << "Tracking \n";
-        break;
-      case Edrak::FrontendState::LOST:
-        std::cout << "LOST \n";
-        break;
-      case Edrak::FrontendState::INITIALIZING:
-        std::cout << "Initializing \n";
-        break;
-      }
-    } else {
+    if (!leftReader.NextFrame(frame->imgData) ||
+        !rightReader.NextFrame(frame->rightImgData)) {
       break;
     }
+    if (frame->imgData.size() != frame->rightImgData.size()) {
+      std::cerr << "Left frame resolution is not equal to the right frame "
+                   "resolution\n";
+      break;
+    }
+    // Add the frame to the system
+    slam.AddFrame(frame);
+    // Get the tracking state
+    auto state = slam.frontend->GetState();
+    switch (state) {
+    case Edrak::FrontendState::TRACKING:
+      std::cout << "Tracking \n";
+      break;
+    case Edrak::FrontendState::LOST:
+      std::cout << "LOST \n";
+      break;
+    case Edrak::FrontendState::INITIALIZING:
+      std::cout << "Initializing \n";
+      break;
+    }
+
     // std::cout << " Frame " << i << " Pose " << fe.GetTwc().matrix() << '\n';
     trajectory.push_back(slam.frontend->GetTwc());
     // std::cin >> wait ;

@@ -216,7 +216,12 @@ int Frontend::TrackLastFrame() {
     int iPrev = match.queryIdx;
     auto feat = std::make_shared<Images::Features::Feature>(
         currentFrame_, currentKps[iCurrent]);
-    feat->landmark = prevFrame_->features[iPrev]->landmark;
+    auto matchedLandmark = prevFrame_->features[iPrev]->landmark.lock();
+    if (!matchedLandmark) {
+      continue;
+    }
+    feat->landmark = matchedLandmark;
+    matchedLandmark->AddObservation(feat);
     currentFrame_->features.push_back(feat);
     currentFrame_->orbDescriptors.row(iCurrent).copyTo(
         matchedDescriptors.row(i++));

@@ -38,7 +38,7 @@ $ make
 2. Extract the sequence and optionally add a settings file inside the sequence
 3. Run the KITTI_VO binary from build/bin/
   ```console 
-  $ ./build/bin/KITTI_VO /SEQUENCE_PATH/SEQUENCE_NUMBER
+  $ ./build/bin/KITTI_VO /SEQUENCE_PATH/SEQUENCE_NUMBER [-s/--headless] [-ba/--run-ba]
   ```
 
 # Screenshots 

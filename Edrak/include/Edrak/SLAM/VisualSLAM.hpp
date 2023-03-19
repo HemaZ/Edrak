@@ -8,22 +8,25 @@
 namespace Edrak {
 class VisualSLAM {
 public:
-  VisualSLAM(const Edrak::StereoCamera &stereoCamera) : camera(stereoCamera) {
+  VisualSLAM(const Edrak::StereoCamera &stereoCamera, bool headless = false)
+      : camera(stereoCamera) {
     frontend = std::make_shared<Edrak::Frontend>();
     map = std::make_shared<Edrak::Map>();
     backend = std::make_shared<Edrak::Backend>();
-    viewer = std::make_shared<Edrak::Viewer>();
 
     frontend->SetMap(map);
     backend->SetMap(map);
-    viewer->SetMap(map);
 
     frontend->SetCamera(camera);
     backend->SetCamera(camera);
 
     frontend->SetBackend(backend);
 
-    frontend->SetViewer(viewer);
+    if (!headless) {
+      viewer = std::make_shared<Edrak::Viewer>();
+      viewer->SetMap(map);
+      frontend->SetViewer(viewer);
+    }
   }
 
   bool AddFrame(StereoFrame::SharedPtr frame) {

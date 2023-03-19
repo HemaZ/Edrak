@@ -3,21 +3,38 @@
 #include "Edrak/IO/Trajectory.hpp"
 #include "Edrak/SLAM/VisualSLAM.hpp"
 #include "Edrak/Visual/3D.hpp"
+#include "argh.h"
 #include <memory>
 #include <unistd.h>
+
 int main(int argc, char const *argv[]) {
   std::string data_dir = EDRAK_TEST_DATA_DIR;
   std::string imgs_path = data_dir + "KITTI/";
 
-  if (argc > 1) {
-    if (argv[1][0] != '/') {
-      imgs_path += argv[1];
+  argh::parser cmdl(argv);
+  bool headless = false;
+  bool runBA = false;
+  int seqEnd = -1;
+
+  if (cmdl(1)) {
+    if (cmdl[1][0] != '/') {
+      imgs_path += cmdl[1];
     } else {
-      imgs_path = argv[1];
+      imgs_path = cmdl[1];
     }
   } else {
-    std::cerr << "No KITTI sequence is provied. Exiting !";
+    std::cerr << "No KITTI sequence is provided. Exiting !";
     return -1;
+  }
+
+  cmdl(2, -1) >> seqEnd;
+
+  if (cmdl[{"-s", "--headless"}]) {
+    headless = true;
+  }
+
+  if (cmdl[{"-ba", "--run-ba"}]) {
+    runBA = true;
   }
 
   std::cout << " Processing " << imgs_path << " Frames\n";
@@ -34,10 +51,12 @@ int main(int argc, char const *argv[]) {
   Edrak::StereoCamera cam{leftCamCalib, rightCamCalib,
                           rightCamCalib.pose.translation().norm()};
 
-  Edrak::VisualSLAM slam(cam);
+  Edrak::VisualSLAM slam(cam, headless);
 
   auto settings = Edrak::SLAM::LoadSettings(imgs_path + "/settings.yaml");
   if (settings.has_value()) {
+    std::cout << "Settings file loaded from path "
+              << imgs_path + "/settings.yaml\n";
     slam.frontend->SetSettings(*settings);
   }
 
@@ -47,7 +66,6 @@ int main(int argc, char const *argv[]) {
                                     Edrak::IO::ImageType::GRAY, false};
   std::string wait;
   Edrak::TrajectoryD trajectory;
-
   while (true) {
     // Create a stereo frame
     Edrak::StereoFrame::SharedPtr frame = Edrak::StereoFrame::CreateFrame();
@@ -64,6 +82,7 @@ int main(int argc, char const *argv[]) {
     slam.AddFrame(frame);
     // Get the tracking state
     auto state = slam.frontend->GetState();
+    std::cout << "#" << frame->frameId << ": ";
     switch (state) {
     case Edrak::FrontendState::TRACKING:
       std::cout << "Tracking \n";
@@ -79,6 +98,9 @@ int main(int argc, char const *argv[]) {
     // std::cout << " Frame " << i << " Pose " << fe.GetTwc().matrix() << '\n';
     trajectory.push_back(slam.frontend->GetTwc());
     // std::cin >> wait ;
+    if (frame->frameId == seqEnd) {
+      break;
+    }
   }
 
   Edrak::TrajectoryD KeyframesTrajbeforeBa;
@@ -89,23 +111,23 @@ int main(int argc, char const *argv[]) {
   std::cout << "Writing KeyFrames Trajectories File \n";
   Edrak::IO::ExportTrajectory(imgs_path + "/kfs_trajectory_before_ba.txt",
                               KeyframesTrajbeforeBa);
-  std::cout << "Running BA \n";
-  // slam.backend->OptimizeMap();
   std::cout << "Writing PLY File \n";
   Edrak::WritePLYFromLandmarks(slam.map->GetAllLandmarks(),
                                imgs_path + "/out.ply");
-  Edrak::IO::ExportTrajectory(imgs_path + "/trajectory.txt", trajectory);
-
-  Edrak::TrajectoryD KeyframesTraj;
-  for (const auto &kfPose : slam.map->GetAllKeyframes()) {
-    KeyframesTraj.push_back(kfPose.second->Twc());
+  if (runBA) {
+    std::cout << "Running BA \n";
+    slam.backend->OptimizeMap();
+    Edrak::TrajectoryD KeyframesTraj;
+    for (const auto &kfPose : slam.map->GetAllKeyframes()) {
+      KeyframesTraj.push_back(kfPose.second->Twc());
+    }
+    slam.viewer->AddCurrentKFsTrajectory(KeyframesTraj);
+    std::cout << "Writing KeyFrames Trajectories File \n";
+    Edrak::IO::ExportTrajectory(imgs_path + "/kfs_trajectory_after_ba.txt",
+                                KeyframesTraj);
   }
-  slam.viewer->AddCurrentKFsTrajectory(KeyframesTraj);
-  std::cout << "Writing KeyFrames Trajectories File \n";
-  Edrak::IO::ExportTrajectory(imgs_path + "/kfs_trajectory_after_ba.txt",
-                              KeyframesTraj);
 
-  while (true) {
+  while (true && !headless) {
     usleep(5000);
     slam.viewer->UpdateMap();
   }

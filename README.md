@@ -1,3 +1,4 @@
+[![FreePalestine.Dev](https://freepalestine.dev/header/1)](https://freepalestine.dev)
 # Edrak
 ![logo](docs/Logo.png)
 

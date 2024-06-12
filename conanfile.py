@@ -28,6 +28,7 @@ class EdrakConan(ConanFile):
         "fmt/8.1.1",
         "spdlog/1.10.0",
         "yaml-cpp/0.7.0",
+        "argh/1.3.2"
     )
 
     def config_options(self):

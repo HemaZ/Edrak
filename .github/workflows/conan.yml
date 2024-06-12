@@ -27,7 +27,7 @@ jobs:
       id: conan
       uses: turtlebrowser/get-conan@main
       with:
-        version: 1.54.0
+        version: 1.59.0
 
     - name: Conan version
       run: echo "${{ steps.conan.outputs.version }}"
@@ -42,7 +42,7 @@ jobs:
       run: git clone --recursive https://github.com/stevenlovegrove/Pangolin.git && cd Pangolin  && sudo apt update && ./scripts/install_prerequisites.sh recommended && cmake -B build && cmake --build build && sudo cmake --install build
       
     - name: Install G2o
-      run: sudo apt update && sudo apt install -y libcxsparse3 libsuitesparse-dev && git clone https://github.com/RainerKuemmerle/g2o.git && cd g2o && cmake -B build && cmake --build build && sudo cmake --install build
+      run: sudo apt update && sudo apt install -y libcxsparse3 libsuitesparse-dev && git clone https://github.com/RainerKuemmerle/g2o.git && cd g2o && cmake -B build -DG2O_BUILD_EXAMPLES=OFF -DG2O_BUILD_APPS=OFF && cmake --build build && sudo cmake --install build
 
     - name: Install dependencies
       run: export CONAN_SYSREQUIRES_MODE=enabled && export CONAN_SYSREQUIRES_SUDO=True && conan install . -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True --build=missing --install-folder=${{github.workspace}}/build
